@@ -1,0 +1,28 @@
+[package]
+name = "hello-stm32f103-blue-pill"
+version = "0.1.0"
+edition = "2024"
+
+
+[dependencies]
+cortex-m = { version = "0.7", features = ["critical-section-single-core"] }
+# Direct dep: #[embassy_executor::main] expands to cortex_m_rt::entry.
+cortex-m-rt = "0.7"
+panic-halt = "1.0"
+
+# Async runtime; platform-cortex-m + executor-thread enable thread-mode + the main macro.
+[dependencies.embassy-executor]
+version = "0.10"
+features = ["platform-cortex-m", "executor-thread"]
+
+# STM32 HAL for the STM32F103C8 (Blue Pill); memory-x auto-generates memory.x.
+[dependencies.embassy-stm32]
+version = "0.6.0"
+features = ["stm32f103c8", "memory-x", "time-driver-any", "time"]
+
+[dependencies.embassy-time]
+version = "0.5"
+
+[[bin]]
+name = "hello-stm32f103-blue-pill"
+test = false

@@ -1,0 +1,19 @@
+[package]
+name = "hello-stm32h745-nucleo"
+version = "0.1.0"
+edition = "2024"
+
+
+[dependencies]
+cortex-m-rt = "0.7.3"
+panic-halt = "1.0"
+
+[dependencies.stm32h7xx-hal]
+version = "0.16.0"
+# STM32H745 shares RM0399 silicon with H747 (same dual-core topology).
+# Use the stm32h747cm7 feature to target the Cortex-M7 core.
+features = ["stm32h747cm7", "rt"]
+
+[[bin]]
+name = "hello-stm32h745-nucleo"
+test = false

@@ -1,0 +1,18 @@
+# T2 ("application is the manifest repo") topology: this directory IS the west
+# manifest. `west init -l .` here, then `west update` pulls Zephyr + its modules
+# (hal_nordic, …) into the workspace alongside it. Only the files in this folder are
+# committed; the pulled trees are gitignored (see the repo-root .gitignore).
+manifest:
+  remotes:
+    - name: zephyrproject-rtos
+      url-base: https://github.com/zephyrproject-rtos
+
+  projects:
+    - name: zephyr
+      remote: zephyrproject-rtos
+      revision: v4.4.1
+      # Import Zephyr's own manifest so its HAL modules and deps come along.
+      import: true
+
+  self:
+    path: .

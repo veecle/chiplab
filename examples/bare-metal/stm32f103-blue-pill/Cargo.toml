@@ -1,0 +1,19 @@
+[package]
+name = "hello-stm32f103-blue-pill"
+version = "0.1.0"
+edition = "2024"
+
+
+[dependencies]
+cortex-m-rt = "0.7.3"
+nb = "1.0"
+panic-halt = "1.0"
+
+[dependencies.stm32f1xx-hal]
+version = "0.11.0"
+# stm32f103c8t6 = medium density (8 = medium, suffix C = 48-pin LQFP)
+features = ["stm32f103", "medium"]
+
+[[bin]]
+name = "hello-stm32f103-blue-pill"
+test = false

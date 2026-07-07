@@ -1,0 +1,21 @@
+[package]
+name = "hello-stm32l073-nucleo"
+version = "0.1.0"
+edition = "2024"
+
+
+[dependencies]
+cortex-m-rt = "0.7.3"
+nb = "1.0"
+panic-halt = "1.0"
+# stm32l0xx-hal 0.10 uses embedded-time for baud rate specification
+embedded-time = "0.12"
+
+[dependencies.stm32l0xx-hal]
+version = "0.10.0"
+# mcu-STM32L073RZTx matches the exact MCU on the NUCLEO-L073RZ board (LQFP64, 192K Flash)
+features = ["mcu-STM32L073RZTx", "rt"]
+
+[[bin]]
+name = "hello-stm32l073-nucleo"
+test = false

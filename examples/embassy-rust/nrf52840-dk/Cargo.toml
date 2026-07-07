@@ -1,0 +1,28 @@
+[package]
+name = "hello-nrf52840-dk"
+version = "0.1.0"
+edition = "2024"
+
+
+[dependencies]
+cortex-m = { version = "0.7", features = ["critical-section-single-core"] }
+# Direct dep: #[embassy_executor::main] expands to cortex_m_rt::entry.
+cortex-m-rt = "0.7"
+panic-halt = "1.0"
+
+# Async runtime; platform-cortex-m + executor-thread enable thread-mode + the main macro.
+[dependencies.embassy-executor]
+version = "0.10"
+features = ["platform-cortex-m", "executor-thread"]
+
+# nRF HAL for the nRF52840 DK. No memory-x feature, so memory.x comes from build.rs.
+[dependencies.embassy-nrf]
+version = "0.11"
+features = ["nrf52840", "time-driver-rtc1", "time"]
+
+[dependencies.embassy-time]
+version = "0.5"
+
+[[bin]]
+name = "hello-nrf52840-dk"
+test = false

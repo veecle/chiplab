@@ -1,0 +1,15 @@
+[package]
+name = "hello-nrf52840-dk"
+version = "0.1.0"
+edition = "2024"
+
+
+[dependencies]
+cortex-m = "0.7"
+cortex-m-rt = "0.7.3"
+nrf52840-hal = "0.18"
+panic-halt = "1.0"
+
+[[bin]]
+name = "hello-nrf52840-dk"
+test = false

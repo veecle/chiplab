@@ -1,0 +1,28 @@
+[package]
+name = "hello-stm32wba52-nucleo"
+version = "0.1.0"
+edition = "2024"
+
+
+[dependencies]
+cortex-m = { version = "0.7", features = ["critical-section-single-core"] }
+# Direct dep: #[embassy_executor::main] expands to cortex_m_rt::entry.
+cortex-m-rt = "0.7"
+panic-halt = "1.0"
+
+# Async runtime. Do NOT also enable embassy-stm32's executor-thread: duplicate __pender symbol.
+[dependencies.embassy-executor]
+version = "0.10"
+features = ["platform-cortex-m", "executor-thread"]
+
+# STM32 HAL for the STM32WBA52CG; memory-x auto-generates memory.x.
+[dependencies.embassy-stm32]
+version = "0.6.0"
+features = ["stm32wba52cg", "memory-x", "time-driver-any", "time"]
+
+[dependencies.embassy-time]
+version = "0.5"
+
+[[bin]]
+name = "hello-stm32wba52-nucleo"
+test = false
