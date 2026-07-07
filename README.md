@@ -99,13 +99,14 @@ server-side, so [open a request](https://github.com/veecle/chiplab/issues/new/ch
 rather than adding an example for an unsupported board — and if anything's unclear or
 rough, please tell us; we're still smoothing the edges.
 
-## Want a chip, OS, or peripheral we don't cover yet?
+## Found a bug? Missing a chip? Tell us here.
 
-Please don't hesitate to ask. Whatever MCU, RTOS/framework, or peripheral you need — or
-any other idea — we genuinely want to hear it, and requests really do shape the roadmap.
+This is Chiplab's public home — bug reports, feature ideas, and chip/OS/peripheral
+requests all belong in this repo's issues. Whatever you hit or need, we genuinely want
+to hear it, and requests really do shape the roadmap.
 
-- **[Open a request or issue](https://github.com/veecle/chiplab/issues/new/choose)** —
-  tell us the chip and what you're building.
+- **[Open an issue](https://github.com/veecle/chiplab/issues/new/choose)** — pick the
+  bug, feature, or chip request form (or start from a blank issue).
 - Come say hi on [Discord](https://discord.com/invite/F6GwZJ6ktP).
 
 See [veecle.ai/roadmap](https://veecle.ai/roadmap) for what's already planned.
