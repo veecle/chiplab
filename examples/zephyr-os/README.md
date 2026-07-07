@@ -1,7 +1,7 @@
 # Zephyr OS
 
 [Zephyr RTOS](https://zephyrproject.org) C firmware. Each example prints `Hello world!`
-over the board's default Zephyr console (UART), which ChipLab captures into `stdout`.
+over the board's default Zephyr console (UART), which Chiplab captures into `stdout`.
 
 Unlike the Rust frameworks, a Zephyr build needs a **west workspace**: the Zephyr tree
 plus its HAL modules, pulled by `west`. This repo commits only the **baseline

@@ -2,15 +2,14 @@
 
 Machine-readable guide for AI coding agents working in this repository.
 
-## What is ChipLab
+## What is Chiplab
 
-ChipLab simulates firmware on virtual instances of real microcontrollers: upload a
+Chiplab simulates firmware on virtual instances of real microcontrollers: upload a
 compiled ELF, run it on a named virtual board, read back the captured UART output. (See
 the [README](README.md) for the human-facing pitch.)
 
 - **MCP endpoint:** `https://chiplab.veecle.ai/mcp`
-- **Account / sign-in:** https://veecle.ai (self-serve; free tier: 50 credits/day, no
-  credit card)
+- **Account / sign-in:** https://veecle.ai (self-serve; free tier, no credit card)
 
 This repo ships ready-to-run examples for **every supported board**, grouped by
 framework — currently `bare-metal` (vendor-HAL / direct-register), `embassy-rust`
@@ -18,22 +17,22 @@ framework — currently `bare-metal` (vendor-HAL / direct-register), `embassy-ru
 [Zephyr RTOS](https://zephyrproject.org), built with `west`), and `freertos` (C on the
 [FreeRTOS](https://www.freertos.org) kernel, built with `make`), each documented in
 `examples/<framework>/`. A user can open this repo, connect their
-agent to ChipLab, and say *"install ChipLab and test it on &lt;board&gt;"* — everything
+agent to Chiplab, and say *"install Chiplab and test it on &lt;board&gt;"* — everything
 an agent needs to do that is below.
 
-## 1. Install / connect ChipLab
+## 1. Install / connect Chiplab
 
 1. Ensure the user has a veecle.ai account (self-serve sign-up; no manual
    provisioning).
-2. Add the ChipLab MCP server to the host agent. Per-client configuration is in the
+2. Add the Chiplab MCP server to the host agent. Per-client configuration is in the
    [README](README.md#connect-your-agent). The endpoint is
    `https://chiplab.veecle.ai/mcp`; use `chiplab` as the server name.
 3. Complete sign-in in the browser when prompted.
 
 ## 2. Verify the connection
 
-Call ChipLab's discovery/help tool with no arguments. A successful response returns an
-overview of ChipLab. **Always call it first in a session** — it carries chip-specific
+Call Chiplab's discovery/help tool with no arguments. A successful response returns an
+overview of Chiplab. **Always call it first in a session** — it carries chip-specific
 gotchas and validated fixes.
 
 ## 3. Pick the example for the board you want
@@ -69,7 +68,7 @@ The Rust frameworks require Rust ≥ 1.85 (for `edition = "2024"`); run `rustup 
 stable` if needed. Per-board targets and concrete examples are in each framework's
 `examples/<framework>/AGENTS.md`.
 
-## 5. Run it on ChipLab
+## 5. Run it on Chiplab
 
 Upload the ELF, then run it on the target board — the same flow for every board, only
 the ELF path and board change. The connected MCP client exposes the exact tool
@@ -82,16 +81,16 @@ see several lines).
 
 ## Tool reference
 
-ChipLab exposes its tools over standard MCP tool discovery — your MCP client
+Chiplab exposes its tools over standard MCP tool discovery — your MCP client
 automatically retrieves the current tool set and their schemas when it connects, so
 this doc doesn't hardcode a tool count or exact names (they may change and more may be
-added). By convention, ChipLab also provides a discovery/help tool — call it first,
+added). By convention, Chiplab also provides a discovery/help tool — call it first,
 with no arguments — for chip-specific gotchas and validated fixes not captured in the
 schemas alone, and to see what else is currently available.
 
 ## End-to-end recipe (cold open)
 
-When a user says *"install ChipLab, tell me what to do, and test &lt;board&gt;"*:
+When a user says *"install Chiplab, tell me what to do, and test &lt;board&gt;"*:
 
 1. Confirm/establish the MCP connection (§1) and call the discovery/help tool with no
    arguments (§2).
@@ -104,7 +103,7 @@ When a user says *"install ChipLab, tell me what to do, and test &lt;board&gt;"*
 
 ## How to contribute (adding or editing examples)
 
-Examples exist to validate ChipLab end-to-end, nothing more. Keep them minimal.
+Examples exist to validate Chiplab end-to-end, nothing more. Keep them minimal.
 
 - **One example per `examples/<framework>/<board>/`.** Mirror an existing example for
   the same framework; the framework's own conventions (layout, deps, gotchas) live in
@@ -131,7 +130,7 @@ Examples exist to validate ChipLab end-to-end, nothing more. Keep them minimal.
 
 - Call the discovery/help tool first; it carries chip-specific gotchas and validated
   fixes.
-- Cross-compilation happens on your side; ChipLab runs the ELF as-is.
+- Cross-compilation happens on your side; Chiplab runs the ELF as-is.
 - Simulations are bounded to a fixed amount of virtual time; the captured output is
   the UART capture.
 - Boards are supported across the STM32 and Nordic nRF families, each with a

@@ -1,10 +1,10 @@
-# ChipLab
+# Chiplab
 
 > Simulate & validate firmware on virtual instances of real chips, straight from your AI coding agent — no hardware.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-ChipLab is a hosted MCP service.
+Chiplab is a hosted MCP service.
 Your AI coding agent connects to it, uploads compiled firmware, runs it on a virtual instance of a real microcontroller, and reads back the UART output.
 
 We're trying to build the next way to develop chips — and we're doing it in the open,
@@ -15,15 +15,15 @@ to see. We'd genuinely love your feedback, and contributions are very welcome.
 ## Quickstart
 
 1. Create a free account at **[veecle.ai](https://veecle.ai)** (no credit card).
-2. Add the ChipLab MCP server to your agent (see [Connect your agent](#connect-your-agent)).
+2. Add the Chiplab MCP server to your agent (see [Connect your agent](#connect-your-agent)).
 3. `git clone https://github.com/veecle/chiplab && cd chiplab`
 4. One-time: `rustup target add thumbv7m-none-eabi`
-5. Tell your agent: *"Build `examples/bare-metal/stm32f4-discovery` and run it on ChipLab."*
+5. Tell your agent: *"Build `examples/bare-metal/stm32f4-discovery` and run it on Chiplab."*
 6. Read `Hello world!` back from the virtual chip's UART.
 
 ## Connect your agent
 
-ChipLab is an HTTP MCP server at `https://chiplab.veecle.ai/mcp`. Add it to any
+Chiplab is an HTTP MCP server at `https://chiplab.veecle.ai/mcp`. Add it to any
 MCP-compatible client using the standard `mcpServers` schema:
 
 ```json
@@ -38,7 +38,7 @@ MCP-compatible client using the standard `mcpServers` schema:
 ```
 
 On first use your client opens a browser to sign in. Verify
-the connection by asking your agent to call ChipLab's discovery/help tool with no
+the connection by asking your agent to call Chiplab's discovery/help tool with no
 arguments.
 
 Client-specific notes: Claude Code — if you cloned this repo, the server is already
@@ -53,7 +53,7 @@ instead of `mcpServers`. Codex uses TOML in `~/.codex/config.toml` — add
 
 ## Build & run an example
 
-ChipLab's contract is framework-agnostic: **produce an ELF → upload it → run it on your
+Chiplab's contract is framework-agnostic: **produce an ELF → upload it → run it on your
 target board → read the captured output.** How you produce the ELF is
 framework-specific — see the [frameworks](#frameworks) below. The Rust hero path:
 
@@ -66,7 +66,7 @@ cargo build --release
 
 With an ELF in hand, your agent uploads it and runs it on the target board — the same
 flow for every board and framework, only the ELF path and board change. The connected
-MCP client surfaces the exact tool calls and parameters live; ask ChipLab's discovery/
+MCP client surfaces the exact tool calls and parameters live; ask Chiplab's discovery/
 help tool if you need a refresher.
 
 The run returns synchronously with the captured output — the firmware runs for a
@@ -89,7 +89,7 @@ frameworks cover it.
 ## Contributing
 
 We'd love your help — and adding an example is the easiest way in. Examples exist to
-validate ChipLab end-to-end, so we keep them minimal: one per
+validate Chiplab end-to-end, so we keep them minimal: one per
 `examples/<framework>/<board>/`, named `hello-<board>`, printing `Hello world!` over
 UART. Add a board by mirroring an existing example for the same framework and adding a
 row to [supported-boards.md](supported-boards.md); each framework's own conventions and

@@ -47,9 +47,9 @@ west build -b <west-board>                              # the west `-b` board co
   released tag, not a branch, for reproducible builds.
 - **The ELF is `build/zephyr/zephyr.elf`** — not `hello-<board>`; Zephyr fixes the
   output name. Upload that path.
-- **Console must be UART, not RTT.** ChipLab captures UART output; if a board enabled
+- **Console must be UART, not RTT.** Chiplab captures UART output; if a board enabled
   `CONFIG_RTT_CONSOLE`/`CONFIG_USE_SEGGER_RTT`, output would bypass `stdout`. The
-  nRF52840 DK defaults to `zephyr,console = &uart0`, which ChipLab captures — so
+  nRF52840 DK defaults to `zephyr,console = &uart0`, which Chiplab captures — so
   `prj.conf` stays empty.
 - **`west sdk install` needs a workspace** — it's unavailable until after `west init` +
   `west update`, so run it in that order.

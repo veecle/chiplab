@@ -1,6 +1,6 @@
 # Supported boards, OS/frameworks & examples
 
-This is the single source of truth for what ChipLab supports **today** — and the list
+This is the single source of truth for what Chiplab supports **today** — and the list
 keeps growing. The `Board key` column is this repo's identifier for each board; call
 the discovery/help tool to confirm the exact value and format your MCP client should
 pass. Each board has one or more ready-to-run examples under
@@ -33,7 +33,7 @@ target per board) live in each framework's doc under
 
 ## What simulation covers
 
-ChipLab boots a virtual instance of the chip using board-level platform descriptions,
+Chiplab boots a virtual instance of the chip using board-level platform descriptions,
 executed on an open simulation platform, with more platforms joining as coverage
 grows. Each run includes:
 

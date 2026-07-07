@@ -1,7 +1,7 @@
 # FreeRTOS (C)
 
 A minimal [FreeRTOS](https://www.freertos.org) application: one task prints
-`Hello world!` over the UART, which ChipLab captures into `stdout`. FreeRTOS is just a
+`Hello world!` over the UART, which Chiplab captures into `stdout`. FreeRTOS is just a
 kernel (scheduler + a CPU port), so the example pairs it with a tiny hand-written vendor
 layer — direct-register UART, startup, and linker script — instead of a full HAL.
 
