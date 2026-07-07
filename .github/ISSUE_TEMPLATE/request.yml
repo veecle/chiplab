@@ -1,0 +1,51 @@
+name: Request a chip, OS/framework, or peripheral
+description: Ask us to add support for a new microcontroller, OS/framework, or peripheral.
+title: "[Request]: "
+labels: ["request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please 👍 existing requests to add weight rather than filing duplicates.
+  - type: dropdown
+    id: type
+    attributes:
+      label: What are you requesting?
+      options:
+        - Chip / MCU
+        - OS / framework
+        - Peripheral
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: target
+    attributes:
+      label: Chip, board, OS/framework, or peripheral
+      description: The specific thing you need, e.g. STM32F407VG, Zephyr, CAN.
+      placeholder: STM32F407VG
+    validations:
+      required: true
+  - type: textarea
+    id: usecase
+    attributes:
+      label: Use case
+      description: What are you trying to build or validate?
+    validations:
+      required: true
+  - type: input
+    id: datasheet
+    attributes:
+      label: Datasheet / reference manual URL (if chip request)
+      placeholder: https://...
+  - type: textarea
+    id: renode
+    attributes:
+      label: Existing Renode support? (if chip request)
+      description: If you know of a Renode platform description for this chip, link it or describe the status.
+  - type: checkboxes
+    id: help-test
+    attributes:
+      label: Willing to help test?
+      options:
+        - label: I can help test this once it's available.

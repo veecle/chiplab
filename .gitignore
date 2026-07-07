@@ -1,0 +1,19 @@
+target/
+.direnv
+**/*.rs.bk
+.sisyphus/
+.DS_Store
+
+# Zephyr / west workspace artifacts (pulled by `west update`, never committed).
+# The example dirs under examples/zephyr-os/ are the baseline app + manifest only;
+# users run `west init -l . && west update` to populate the workspace below.
+.west/
+build/
+.venv/
+examples/zephyr-os/**/zephyr/
+examples/zephyr-os/**/modules/
+examples/zephyr-os/**/bootloader/
+examples/zephyr-os/**/tools/
+
+# FreeRTOS: the kernel is fetched by `make setup` (pinned tag), never committed.
+examples/freertos/**/freertos-kernel/

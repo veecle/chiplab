@@ -1,0 +1,41 @@
+name: Build examples
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - "examples/**"
+      - ".github/workflows/build-examples.yml"
+
+jobs:
+  rust:
+    name: Rust (bare-metal + embassy-rust)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: thumbv6m-none-eabi,thumbv7m-none-eabi,thumbv7em-none-eabi,thumbv7em-none-eabihf,thumbv8m.main-none-eabihf
+      - name: Build every bare-metal and embassy-rust example
+        run: |
+          for dir in examples/bare-metal/*/ examples/embassy-rust/*/; do
+            echo "::group::${dir}"
+            (cd "${dir}" && cargo build --release)
+            echo "::endgroup::"
+          done
+
+  freertos:
+    name: FreeRTOS
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install arm-none-eabi-gcc
+        run: sudo apt-get update && sudo apt-get install -y gcc-arm-none-eabi
+      - name: Build every freertos example
+        run: |
+          for dir in examples/freertos/*/; do
+            echo "::group::${dir}"
+            (cd "${dir}" && make setup && make)
+            echo "::endgroup::"
+          done

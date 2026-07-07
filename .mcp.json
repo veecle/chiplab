@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "chiplab": {
+      "type": "http",
+      "url": "https://chiplab.veecle.ai/mcp"
+    }
+  }
+}
