@@ -1,0 +1,36 @@
+---
+title: "Agents Overview"
+description: "How Chiplab connects to your AI coding agent over MCP, and where to find the setup guide for your client."
+---
+
+Chiplab exposes its simulation capabilities through the Model Context Protocol (MCP). Once your agent is connected, it can call tools like `ask` and `run` directly inside a chat or terminal session, no manual API calls, no context switching, no physical board required.
+
+## How it works
+
+Chiplab acts as an MCP server; your coding agent acts as the MCP client. When you send a message that involves firmware simulation, your agent automatically discovers the available tools and calls them on your behalf. Authentication happens once via a browser-based OAuth flow, you never need to copy tokens or manage credentials manually.
+
+## MCP server URL
+
+Chiplab's MCP server is available at `https://chiplab.veecle.ai/mcp`. This URL is public and requires no special handling. Authentication happens separately, through your browser session.
+
+## Choose your agent
+
+<CardGroup cols={3}>
+  <Card title="Cursor" icon="arrow-pointer" href="/agents/cursor">Add Chiplab to Cursor's MCP settings and run firmware simulations from the editor's AI chat panel.</Card>
+  <Card title="OpenCode" icon="terminal" href="/agents/opencode">Register Chiplab as a remote MCP server in OpenCode and authenticate from your terminal.</Card>
+  <Card title="Claude Code" icon="code" href="/agents/claude-code">Register Chiplab as an HTTP MCP server in the Claude Code CLI and connect in a single command.</Card>
+  <Card title="Claude Desktop" icon="desktop" href="/agents/claude-desktop">Add Chiplab as a connector in Claude Desktop and authenticate in the browser.</Card>
+  <Card title="VS Code" icon="laptop-code" href="/agents/vs-code">Register Chiplab in VS Code's MCP config and use it from Copilot's agent mode.</Card>
+  <Card title="Codex" icon="square-terminal" href="/agents/codex">Add Chiplab to the Codex CLI's TOML config and sign in with one command.</Card>
+</CardGroup>
+
+These guides cover Chiplab's most-used clients, but Chiplab isn't limited to them — it works with any MCP-capable client. GitHub Copilot and others connect to the same server URL above using their client's standard MCP configuration.
+
+## Managing connected sessions
+
+After you complete the authentication flow, your agent session appears on the [API Keys](/platform/api-keys) page of the Chiplab dashboard under **Connected agents**. From there you can:
+
+* See when the agent first connected and when it was last active.
+* **Revoke** any session instantly, the agent loses access immediately and must re-authenticate to reconnect.
+
+Revoking is useful when you rotate machines, hand off a project, or suspect a session has been exposed.

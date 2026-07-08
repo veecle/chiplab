@@ -1,0 +1,39 @@
+---
+title: "OpenCode"
+description: "Connect OpenCode to Chiplab's MCP server and authenticate."
+---
+
+## Prerequisites
+
+* OpenCode installed and available on your `PATH`.
+
+## Connect Chiplab
+
+<Steps>
+  <Step title="Register the server in opencode.json">
+    ```json opencode.json
+    {
+      "mcp": {
+        "chiplab": {
+          "type": "remote",
+          "url": "https://chiplab.veecle.ai/mcp",
+          "enabled": true
+        }
+      }
+    }
+    ```
+  </Step>
+  <Step title="Authenticate with Chiplab">
+    ```bash
+    opencode mcp auth chiplab
+    ```
+  </Step>
+</Steps>
+
+<Note>Start a fresh OpenCode session after authenticating.</Note>
+
+<Tip>Add to `AGENTS.md`: "After making firmware changes, test them on Chiplab before reporting back."</Tip>
+
+## Revoking access
+
+[API Keys](/platform/api-keys) page → Connected agents → Revoke.

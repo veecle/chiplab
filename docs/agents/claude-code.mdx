@@ -1,0 +1,38 @@
+---
+title: "Claude Code"
+description: "Connect Claude Code to Chiplab's MCP server and authenticate."
+---
+
+## Prerequisites
+
+* Claude Code CLI installed and authenticated with Anthropic.
+
+## Connect Chiplab
+
+<Steps>
+  <Step title="Register the MCP server">
+    If you cloned the [Chiplab repo](https://github.com/veecle/chiplab), the server is already registered via `.mcp.json` at the repo root, Claude Code will prompt you to trust it the first time you open the project.
+
+    Otherwise, register it with one command:
+
+    ```bash
+    claude mcp add --transport http chiplab https://chiplab.veecle.ai/mcp
+    ```
+  </Step>
+  <Step title="Verify the registration">
+    ```bash
+    claude mcp list
+    ```
+  </Step>
+  <Step title="Authenticate inside a session">
+    Run `/mcp`, select **chiplab**, complete OAuth in browser.
+  </Step>
+</Steps>
+
+<Note>After OAuth, run `/mcp` again, it shows **connected**. This only happens once per machine.</Note>
+
+<Tip>Add to `CLAUDE.md`: "After making firmware changes, test them on Chiplab before reporting back."</Tip>
+
+## Revoking access
+
+[API Keys](/platform/api-keys) page → Connected agents → Revoke.
