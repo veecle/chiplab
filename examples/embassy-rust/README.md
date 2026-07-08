@@ -26,7 +26,7 @@ cargo build --release
 # ELF: target/<rust-target>/release/hello-<board>
 ```
 
-Then upload and run it per the [root README](../../README.md#build--run-an-example).
+Then upload and run it per the [root README](../../README.md#how-it-works).
 
 Stuck, or want this on a board we don't cover yet? We'd love to hear from you —
 [open an issue](https://github.com/veecle/chiplab/issues/new/choose) and we're glad to

@@ -6,25 +6,27 @@
 
 Chiplab is a hosted MCP service.
 Your AI coding agent connects to it, uploads compiled firmware, runs it on a virtual instance of a real microcontroller, and reads back the UART output.
+You don't drive the toolchain — your agent does.
 
-We're trying to build the next way to develop chips — and we're doing it in the open,
-early. Today it runs `Hello world!` on STM32 and Nordic boards; there's a lot more on
-the way - see **[veecle.ai](https://veecle.ai)** for more infos. Give it a try, poke at it, and tell us what you'd like
-to see. We'd genuinely love your feedback, and contributions are very welcome.
+We're building the next way to develop chips, in the open and early.
+Today it runs `Hello world!` on STM32 and Nordic boards; a lot more is on the way — see **[veecle.ai](https://veecle.ai)**.
+Try it, poke at it, and tell us what you'd like to see.
 
 ## Quickstart
 
 1. Create a free account at **[veecle.ai](https://veecle.ai)** (no credit card).
-2. Add the Chiplab MCP server to your agent (see [Connect your agent](#connect-your-agent)).
-3. `git clone https://github.com/veecle/chiplab && cd chiplab`
-4. One-time: `rustup target add thumbv7m-none-eabi`
-5. Tell your agent: *"Build `examples/bare-metal/stm32f4-discovery` and run it on Chiplab."*
-6. Read `Hello world!` back from the virtual chip's UART.
+2. [Connect your agent](#connect-your-agent) to the Chiplab MCP server.
+3. `git clone https://github.com/veecle/chiplab && cd chiplab`, then tell your agent:
+
+   > *"Set up Chiplab and run the stm32f4-discovery example on it."*
+
+Your agent reads [AGENTS.md](AGENTS.md), installs what it needs, builds the firmware, uploads it, runs it on the virtual board, and reports `Hello world!` back from the chip's UART.
+That's the whole loop.
 
 ## Connect your agent
 
-Chiplab is an HTTP MCP server at `https://chiplab.veecle.ai/mcp`. Add it to any
-MCP-compatible client using the standard `mcpServers` schema:
+Chiplab is an HTTP MCP server at `https://chiplab.veecle.ai/mcp`.
+Most clients take the standard `mcpServers` schema:
 
 ```json
 {
@@ -37,79 +39,75 @@ MCP-compatible client using the standard `mcpServers` schema:
 }
 ```
 
-On first use your client opens a browser to sign in. Verify
-the connection by asking your agent to call Chiplab's discovery/help tool with no
-arguments.
+On first use your client opens a browser to sign in.
+To verify, ask your agent to call Chiplab's discovery/help tool with no arguments.
 
-Client-specific notes: Claude Code — if you cloned this repo, the server is already
-configured via [`.mcp.json`](.mcp.json); Claude Code will prompt you to trust it.
-Otherwise add it with one command —
-`claude mcp add --transport http chiplab https://chiplab.veecle.ai/mcp`. Claude Desktop
-(`claude_desktop_config.json`) and Cursor (`.cursor/mcp.json`) use the `mcpServers`
-block above. VS Code (`.vscode/mcp.json`) uses the same block but under a `servers` key
-instead of `mcpServers`. Codex uses TOML in `~/.codex/config.toml` — add
-`[mcp_servers.chiplab]` with `url = "https://chiplab.veecle.ai/mcp"`, then run
-`codex mcp login chiplab` to sign in.
+<details>
+<summary><b>Claude Code</b></summary>
 
-## Build & run an example
-
-Chiplab's contract is framework-agnostic: **produce an ELF → upload it → run it on your
-target board → read the captured output.** How you produce the ELF is
-framework-specific — see the [frameworks](#frameworks) below. The Rust hero path:
+If you cloned this repo, the server is already configured via [`.mcp.json`](.mcp.json) — Claude Code will prompt you to trust it.
+Otherwise:
 
 ```sh
-rustup target add thumbv7m-none-eabi          # one-time, per target
-cd examples/bare-metal/stm32f4-discovery
-cargo build --release
-# ELF: target/thumbv7m-none-eabi/release/hello-stm32f4-discovery
+claude mcp add --transport http chiplab https://chiplab.veecle.ai/mcp
+```
+</details>
+
+<details>
+<summary><b>Claude Desktop / Cursor</b></summary>
+
+Use the `mcpServers` block above in `claude_desktop_config.json` or `.cursor/mcp.json`.
+</details>
+
+<details>
+<summary><b>VS Code</b></summary>
+
+Same block in `.vscode/mcp.json`, but under a `servers` key instead of `mcpServers`.
+</details>
+
+<details>
+<summary><b>Codex</b></summary>
+
+TOML in `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.chiplab]
+url = "https://chiplab.veecle.ai/mcp"
 ```
 
-With an ELF in hand, your agent uploads it and runs it on the target board — the same
-flow for every board and framework, only the ELF path and board change. The connected
-MCP client surfaces the exact tool calls and parameters live; ask Chiplab's discovery/
-help tool if you need a refresher.
+Then sign in with `codex mcp login chiplab`.
+</details>
 
-The run returns synchronously with the captured output — the firmware runs for a
-bounded amount of virtual time, and you'll see `Hello world!` in the output.
+## How it works
 
-## Frameworks
+The contract is framework-agnostic: your agent **builds an ELF → uploads it → runs it on the target board → reads the captured UART output**.
+Runs return synchronously and are bounded to a fixed amount of virtual time.
 
-Each framework carries its own toolchain, build steps, and coding notes in its directory:
+This repo ships a ready-to-run example for every supported board, across four frameworks — [`bare-metal`](examples/bare-metal) (Rust, vendor HAL), [`embassy-rust`](examples/embassy-rust) ([Embassy] async), [`zephyr-os`](examples/zephyr-os) ([Zephyr RTOS], C), and [`freertos`](examples/freertos) ([FreeRTOS], C).
+The full board × framework matrix is in **[supported-boards.md](supported-boards.md)**.
 
-| Framework | Language | Build | Docs |
-|---|---|---|---|
-| `bare-metal` | Rust (vendor HAL) | `cargo build --release` | [README](examples/bare-metal/README.md) · [AGENTS](examples/bare-metal/AGENTS.md) |
-| `embassy-rust` | Rust ([Embassy](https://embassy.dev) async) | `cargo build --release` | [README](examples/embassy-rust/README.md) · [AGENTS](examples/embassy-rust/AGENTS.md) |
-| `zephyr-os` | C ([Zephyr RTOS](https://zephyrproject.org)) | `west build` | [README](examples/zephyr-os/README.md) · [AGENTS](examples/zephyr-os/AGENTS.md) |
-| `freertos` | C ([FreeRTOS](https://www.freertos.org) kernel) | `make` | [README](examples/freertos/README.md) · [AGENTS](examples/freertos/AGENTS.md) |
+[Embassy]: https://embassy.dev
+[Zephyr RTOS]: https://zephyrproject.org
+[FreeRTOS]: https://www.freertos.org
 
-See **[supported-boards.md](supported-boards.md)** for every board and which
-frameworks cover it.
+Toolchain and build details live in each framework's directory (`examples/<framework>/README.md` for humans, `AGENTS.md` for agents) — your agent finds them on its own.
+Prefer building by hand?
+Each framework README has the exact commands.
+
+To run your own firmware, build an ELF for a supported board and ask your agent to upload and run it the same way.
 
 ## Contributing
 
-We'd love your help — and adding an example is the easiest way in. Examples exist to
-validate Chiplab end-to-end, so we keep them minimal: one per
-`examples/<framework>/<board>/`, named `hello-<board>`, printing `Hello world!` over
-UART. Add a board by mirroring an existing example for the same framework and adding a
-row to [supported-boards.md](supported-boards.md); each framework's own conventions and
-gotchas live in its `examples/<framework>/AGENTS.md`. Full rules — including how to add a
-new framework — are in **[AGENTS.md](AGENTS.md)**. New chip/OS/peripheral support is
-server-side, so [open a request](https://github.com/veecle/chiplab/issues/new/choose)
-rather than adding an example for an unsupported board — and if anything's unclear or
-rough, please tell us; we're still smoothing the edges.
+Adding a board example is the easiest way in: mirror an existing example for the same framework and add a row to [supported-boards.md](supported-boards.md).
+All conventions live in **[AGENTS.md](AGENTS.md)** and each framework's `AGENTS.md`.
+New chip, OS, or peripheral support is server-side — [open a request][new-issue] instead of adding an example for an unsupported board.
+
+[new-issue]: https://github.com/veecle/chiplab/issues/new/choose
 
 ## Found a bug? Missing a chip? Tell us here.
 
-This is Chiplab's public home — bug reports, feature ideas, and chip/OS/peripheral
-requests all belong in this repo's issues. Whatever you hit or need, we genuinely want
-to hear it, and requests really do shape the roadmap.
-
-- **[Open an issue](https://github.com/veecle/chiplab/issues/new/choose)** — pick the
-  bug, feature, or chip request form (or start from a blank issue).
-- Come say hi on [Discord](https://discord.com/invite/F6GwZJ6ktP).
-
-See [veecle.ai/roadmap](https://veecle.ai/roadmap) for what's already planned.
+This is Chiplab's public home — bugs, feature ideas, and chip/OS/peripheral requests all belong in [this repo's issues][new-issue].
+Requests really do shape the roadmap — see [veecle.ai/roadmap](https://veecle.ai/roadmap) for what's planned, or come say hi on [Discord](https://discord.com/invite/F6GwZJ6ktP).
 
 ## License
 

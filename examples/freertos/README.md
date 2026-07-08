@@ -31,7 +31,7 @@ make           # builds with arm-none-eabi-gcc
 # ELF: build/hello-stm32f4-discovery.elf
 ```
 
-Then upload and run it per the [root README](../../README.md#build--run-an-example),
+Then upload and run it per the [root README](../../README.md#how-it-works),
 using that ELF path and the board's key.
 
 Stuck, or want this on a board we don't cover yet? We'd love to hear from you —
