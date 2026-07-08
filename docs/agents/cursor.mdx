@@ -37,7 +37,18 @@ description: "Connect Cursor to Chiplab's MCP server and authenticate."
 
 <Note>Reload Cursor after saving `mcp.json` (Developer: Reload Window) so the tools show up.</Note>
 
-<Tip>Add to `.cursorrules`: "After making firmware changes, test them on Chiplab before reporting back."</Tip>
+<Tip>
+  Add a project rule at `.cursor/rules/chiplab.mdc` so Cursor tests firmware changes on Chiplab automatically:
+
+  ```mdc .cursor/rules/chiplab.mdc
+  ---
+  description: Test firmware changes on Chiplab
+  alwaysApply: true
+  ---
+
+  After making firmware changes, test them on Chiplab before reporting back.
+  ```
+</Tip>
 
 ## Revoking access
 
