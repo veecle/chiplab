@@ -83,7 +83,7 @@ Then sign in with `codex mcp login chiplab`.
 The contract is framework-agnostic: your agent **builds an ELF → uploads it → runs it on the target board → reads the captured UART output**.
 Runs return synchronously and are bounded to a fixed amount of virtual time.
 
-This repo ships a ready-to-run example for every supported board, across four frameworks — [`bare-metal`](examples/bare-metal) (Rust, vendor HAL), [`embassy-rust`](examples/embassy-rust) ([Embassy] async), [`zephyr-os`](examples/zephyr-os) ([Zephyr RTOS], C), and [`freertos`](examples/freertos) ([FreeRTOS], C).
+This repo ships a ready-to-run example for every supported board, grouped by framework — [`bare-metal`](examples/bare-metal) (Rust, vendor HAL), [`embassy-rust`](examples/embassy-rust) ([Embassy] async), [`zephyr-os`](examples/zephyr-os) ([Zephyr RTOS], C), and [`freertos`](examples/freertos) ([FreeRTOS], C).
 The full board × framework matrix is in **[supported-boards.md](supported-boards.md)**.
 
 [Embassy]: https://embassy.dev
