@@ -1,0 +1,15 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Chiplab",
+  "colors": { "primary": "#0D9373" },
+  "navigation": {
+    "groups": [
+      { "group": "Get Started", "pages": ["introduction", "quickstart"] },
+      { "group": "Agents", "pages": ["agents/overview", "agents/cursor", "agents/opencode", "agents/claude-code", "agents/claude-desktop", "agents/vs-code", "agents/codex"] },
+      { "group": "Tools", "pages": ["tools/overview"] },
+      { "group": "Hardware", "pages": ["hardware/boards"] },
+      { "group": "Platform", "pages": ["platform/api-keys", "platform/usage"] }
+    ]
+  }
+}

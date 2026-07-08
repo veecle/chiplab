@@ -1,0 +1,16 @@
+{
+  "name": "chiplab",
+  "private": true,
+  "description": "Tooling for the Chiplab repo — currently just the Mintlify docs site under docs/.",
+  "engines": {
+    "node": ">=20 <25"
+  },
+  "scripts": {
+    "docs:dev": "cd docs && mint dev",
+    "docs:check": "cd docs && mint broken-links --check-anchors --check-redirects",
+    "docs:validate": "cd docs && mint validate"
+  },
+  "devDependencies": {
+    "mint": "4.2.667"
+  }
+}
