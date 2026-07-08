@@ -1,0 +1,41 @@
+---
+title: "VS Code"
+description: "Connect VS Code's Copilot agent mode to Chiplab's MCP server and authenticate."
+---
+
+## Prerequisites
+
+* VS Code 1.101 or later, with GitHub Copilot enabled.
+
+## Connect Chiplab
+
+<Steps>
+  <Step title="Add the Chiplab config">
+    Create (or extend) `.vscode/mcp.json` in your workspace:
+
+    ```json .vscode/mcp.json
+    {
+      "servers": {
+        "chiplab": {
+          "type": "http",
+          "url": "https://chiplab.veecle.ai/mcp"
+        }
+      }
+    }
+    ```
+
+    Note the top-level key is `servers`, not `mcpServers`. To make Chiplab available in every workspace instead, run **MCP: Open User Configuration** from the Command Palette and add the same block there. You can also let VS Code write the file for you via **MCP: Add Server**.
+  </Step>
+  <Step title="Start the server and authenticate">
+    Save the file, then click the **Start** action that appears above the server entry. VS Code detects that Chiplab requires sign-in and opens a browser window to complete OAuth.
+  </Step>
+  <Step title="Use it from agent mode">
+    Open Copilot Chat, switch to **Agent** mode, and click the tools icon, Chiplab's tools should be listed.
+  </Step>
+</Steps>
+
+<Tip>Add to `.github/copilot-instructions.md`: "After making firmware changes, test them on Chiplab before reporting back."</Tip>
+
+## Revoking access
+
+[API Keys](/platform/api-keys) page → Connected agents → Revoke.

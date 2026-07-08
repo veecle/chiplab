@@ -1,0 +1,44 @@
+---
+title: "Codex"
+description: "Connect the Codex CLI to Chiplab's MCP server and authenticate."
+---
+
+## Prerequisites
+
+* Codex CLI installed and authenticated with OpenAI.
+
+## Connect Chiplab
+
+<Steps>
+  <Step title="Register the MCP server">
+    One command registers the server and starts the OAuth flow in your browser:
+
+    ```bash
+    codex mcp add chiplab --url https://chiplab.veecle.ai/mcp
+    ```
+
+    Prefer config files? Add the entry to `~/.codex/config.toml` instead, then sign in:
+
+    ```toml ~/.codex/config.toml
+    [mcp_servers.chiplab]
+    url = "https://chiplab.veecle.ai/mcp"
+    ```
+
+    ```bash
+    codex mcp login chiplab
+    ```
+  </Step>
+  <Step title="Verify the registration">
+    ```bash
+    codex mcp list
+    ```
+  </Step>
+</Steps>
+
+<Note>Codex detects that Chiplab supports OAuth and opens the browser sign-in automatically, no tokens to copy.</Note>
+
+<Tip>Add to `AGENTS.md`: "After making firmware changes, test them on Chiplab before reporting back."</Tip>
+
+## Revoking access
+
+[API Keys](/platform/api-keys) page → Connected agents → Revoke.

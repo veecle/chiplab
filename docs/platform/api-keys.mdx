@@ -1,0 +1,57 @@
+---
+title: "API Keys"
+description: "Manage Chiplab API keys and connected agent sessions."
+---
+
+The **API Keys** page is your control panel for authentication in Chiplab. From here you can see every AI agent that's authorized to use your account, check when each one connected and when it was last active, connect new agents, and revoke access you no longer want.
+
+## Connected agents
+
+Every agent session you've authorized shows up in a list, with three columns:
+
+- **Name**, the agent's session identifier.
+- **Connected**, how long ago the session first authenticated.
+- **Last active**, when Chiplab last saw a request from that session.
+
+## Personal access tokens
+
+If you need programmatic access to the Chiplab REST API, for CI/CD pipelines, custom tooling, or scripts, generate a personal access token here. Click **Create**, name it, and store it somewhere safe: the full token is only shown once, at creation time.
+
+## Connecting a new agent
+
+<Steps>
+  <Step title="Open the connect dialog">
+    Click **Connect agent** on the API Keys page.
+  </Step>
+  <Step title="Select your agent type">
+    Choose from the available cards, Cursor, OpenCode, Claude Code, and more added over time.
+  </Step>
+  <Step title="Follow the setup steps">
+    Chiplab shows a ready-to-paste configuration snippet with the connection URL pre-filled. Add it to your agent, then complete the browser-based authentication.
+  </Step>
+  <Step title="Confirm the connection">
+    Once authenticated, the new session appears in your Connected agents list.
+  </Step>
+</Steps>
+
+## Revoking an agent session
+
+Find the session's row and click **Revoke**.
+
+<Warning>
+  Revoking access is immediate and permanent. There's no grace period, and it can't be undone. To use Chiplab from that agent again, you'll need to reconnect and re-authenticate from scratch.
+</Warning>
+
+## Next steps
+
+<CardGroup cols={3}>
+  <Card title="Connect Cursor" icon="arrow-pointer" href="/agents/cursor">
+    Configure Chiplab in Cursor's MCP settings and authenticate.
+  </Card>
+  <Card title="Connect OpenCode" icon="terminal" href="/agents/opencode">
+    Register Chiplab in your OpenCode config and run the auth command.
+  </Card>
+  <Card title="Connect Claude Code" icon="comment-code" href="/agents/claude-code">
+    Add Chiplab via the Claude CLI and authenticate with `/mcp`.
+  </Card>
+</CardGroup>

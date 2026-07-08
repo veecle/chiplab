@@ -1,0 +1,43 @@
+---
+title: "Cursor"
+description: "Connect Cursor to Chiplab's MCP server and authenticate."
+---
+
+## Prerequisites
+
+* Cursor installed and up to date.
+
+## Connect Chiplab
+
+<Steps>
+  <Step title="Open MCP settings in Cursor">
+    In Cursor, open **Settings** → **Tools & MCP** → **New MCP server**.
+  </Step>
+  <Step title="Add the Chiplab config">
+    Paste the following JSON into `~/.cursor/mcp.json`:
+
+    ```json ~/.cursor/mcp.json
+    {
+      "mcpServers": {
+        "chiplab": {
+          "type": "http",
+          "url": "https://chiplab.veecle.ai/mcp"
+        }
+      }
+    }
+    ```
+
+    If `mcp.json` already contains other servers, add the `"chiplab"` entry inside the existing `"mcpServers"` object rather than creating a new file.
+  </Step>
+  <Step title="Connect and authenticate">
+    Back in **Settings** → **Tools & MCP**, find the **chiplab** entry and click **Connect**. Cursor opens a browser window to complete OAuth sign-in.
+  </Step>
+</Steps>
+
+<Note>Reload Cursor after saving `mcp.json` (Developer: Reload Window) so the tools show up.</Note>
+
+<Tip>Add to `.cursorrules`: "After making firmware changes, test them on Chiplab before reporting back."</Tip>
+
+## Revoking access
+
+[API Keys](/platform/api-keys) page → Connected agents → Revoke.
