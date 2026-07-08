@@ -1,0 +1,20 @@
+name: Docs checks
+
+on:
+  pull_request:
+    paths:
+      - "docs/**"
+      - "package.json"
+      - ".nvmrc"
+
+jobs:
+  docs-checks:
+    name: Mintlify broken-links check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+      - run: npm install
+      - run: npm run docs:check

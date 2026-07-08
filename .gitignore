@@ -3,6 +3,7 @@ target/
 **/*.rs.bk
 .sisyphus/
 .DS_Store
+node_modules/
 
 # Zephyr / west workspace artifacts (pulled by `west update`, never committed).
 # The example dirs under examples/zephyr-os/ are the baseline app + manifest only;
