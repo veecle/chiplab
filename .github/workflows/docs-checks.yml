@@ -5,16 +5,19 @@ on:
     paths:
       - "docs/**"
       - "package.json"
+      - "package-lock.json"
       - ".nvmrc"
+      - ".github/workflows/docs-checks.yml"
 
 jobs:
   docs-checks:
-    name: Mintlify broken-links check
+    name: Mintlify validate + broken-links check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
-      - run: npm install
+      - run: npm ci
+      - run: npm run docs:validate
       - run: npm run docs:check

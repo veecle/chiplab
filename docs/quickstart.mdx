@@ -3,23 +3,29 @@ title: "Quickstart"
 description: "Connect your AI coding agent to Chiplab and run your first firmware simulation."
 ---
 
-This guide walks you from a brand-new Chiplab account to a completed firmware simulation. By the end, your AI coding agent will be connected to Chiplab and you'll have seen real UART output from a virtual chip instance, no physical hardware required.
+This guide walks you from a brand-new Chiplab account to a completed firmware simulation.
+By the end, your AI coding agent will be connected to Chiplab and you'll have seen real UART output from a virtual chip instance, no physical hardware required.
 
 <Steps>
   <Step title="Sign in to Chiplab">
-    Go to [chiplab.veecle.ai](https://chiplab.veecle.ai) and sign in with your account. It's self-serve: no credit card needed, and there's a free tier to get you started.
+    Go to [chiplab.veecle.ai](https://chiplab.veecle.ai) and sign in with your account.
+    It's self-serve: no credit card needed, and there's a free tier to get you started.
   </Step>
   <Step title="Connect your agent">
-    Navigate to **API Keys** in the sidebar, then click **Connect agent**. Select your agent from the list, Cursor, OpenCode, Claude Code, and others, and follow the instructions on screen.
+    Navigate to **API Keys** in the sidebar, then click **Connect agent**.
+    Select your agent from the list, Cursor, OpenCode, Claude Code, and others, and follow the instructions on screen.
 
-    Each agent needs a short configuration step to register the Chiplab MCP server (`https://chiplab.veecle.ai/mcp`), followed by a browser-based authentication step. The dashboard shows the exact commands and config snippets for your chosen agent, or see the per-agent guides below.
+    Each agent needs a short configuration step to register the Chiplab MCP server (`https://chiplab.veecle.ai/mcp`), followed by a browser-based authentication step.
+    The dashboard shows the exact commands and config snippets for your chosen agent, or see the per-agent guides below.
 
-    If you're working from a clone of this repo, some agents are pre-configured: Claude Code picks up [`.mcp.json`](https://github.com/veecle/chiplab/blob/main/.mcp.json) automatically and just prompts you to trust it. Otherwise, add Chiplab like any other MCP server, using the standard `mcpServers` block (or `mcp_servers` for Codex's TOML config). On first use your client opens a browser to sign in.
+    If you're working from a clone of this repo, some agents are pre-configured: Claude Code picks up [`.mcp.json`](https://github.com/veecle/chiplab/blob/main/.mcp.json) automatically and just prompts you to trust it.
+    Otherwise, add Chiplab like any other MCP server, using the standard `mcpServers` block (or `mcp_servers` for Codex's TOML config).
+    On first use your client opens a browser to sign in.
   </Step>
   <Step title="Build and run an example">
-    With your agent connected, verify the connection by asking it to call Chiplab's `ask` tool with no arguments, it should come back with a platform overview.
+    With your agent connected, verify the connection by asking it to call Chiplab's `ask` tool with no arguments; it should come back with a platform overview.
 
-    Then try a real simulation. Clone this repo and build the hero example:
+    Then try a real simulation. Clone this repo:
 
     ```sh
     git clone https://github.com/veecle/chiplab && cd chiplab
@@ -31,12 +37,15 @@ This guide walks you from a brand-new Chiplab account to a completed firmware si
     Build and run examples/bare-metal/stm32f4-discovery on Chiplab.
     ```
 
-    Your agent installs what's needed, builds the binary, uploads the ELF, and runs it on a virtual STM32F4 Discovery board. The run returns synchronously, bounded to a fixed amount of virtual time, and you'll see `Hello world!` in the captured UART output.
+    Your agent installs what's needed, builds the binary, uploads the ELF, and runs it on a virtual STM32F4 Discovery board.
+    The run returns synchronously, bounded to a fixed amount of virtual time, and you'll see `Hello world!` in the captured UART output.
 
-    This same produce-an-ELF → upload → run → read-output flow works for every board and framework this repo ships examples for; only the ELF path and board change. See [supported-boards.md](https://github.com/veecle/chiplab/blob/main/supported-boards.md) for the full board list.
+    This same produce-an-ELF → upload → run → read-output flow works for every board and framework this repo ships examples for; only the ELF path and board change.
+    See [supported-boards.md](https://github.com/veecle/chiplab/blob/main/supported-boards.md) for the full board list.
   </Step>
   <Step title="Ask questions about Chiplab">
-    Your agent can also query Chiplab directly, you don't need to prompt this explicitly. It happens automatically whenever your agent needs context, most commonly the first time it uses Chiplab in a session.
+    Your agent can also query Chiplab directly; you don't need to prompt this explicitly.
+    It happens automatically whenever your agent needs context, most commonly the first time it uses Chiplab in a session.
   </Step>
 </Steps>
 

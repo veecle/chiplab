@@ -3,7 +3,8 @@ title: "API Keys"
 description: "Manage Chiplab API keys and connected agent sessions."
 ---
 
-The **API Keys** page is your control panel for authentication in Chiplab. From here you can see every AI agent that's authorized to use your account, check when each one connected and when it was last active, connect new agents, and revoke access you no longer want.
+The **API Keys** page is your control panel for authentication in Chiplab.
+From here you can see every AI agent that's authorized to use your account, check when each one connected and when it was last active, connect new agents, and revoke access you no longer want.
 
 ## Connected agents
 
@@ -15,7 +16,8 @@ Every agent session you've authorized shows up in a list, with three columns:
 
 ## Personal access tokens
 
-If you need programmatic access to the Chiplab REST API, for CI/CD pipelines, custom tooling, or scripts, generate a personal access token here. Click **Create**, name it, and store it somewhere safe: the full token is only shown once, at creation time.
+If you need programmatic access to the Chiplab REST API, for CI/CD pipelines, custom tooling, or scripts, generate a personal access token here.
+Click **Create**, name it, and store it somewhere safe: the full token is only shown once, at creation time.
 
 ## Connecting a new agent
 
@@ -27,7 +29,8 @@ If you need programmatic access to the Chiplab REST API, for CI/CD pipelines, cu
     Choose from the available cards, Cursor, OpenCode, Claude Code, and more added over time.
   </Step>
   <Step title="Follow the setup steps">
-    Chiplab shows a ready-to-paste configuration snippet with the connection URL pre-filled. Add it to your agent, then complete the browser-based authentication.
+    Chiplab shows a ready-to-paste configuration snippet with the connection URL pre-filled.
+    Add it to your agent, then complete the browser-based authentication.
   </Step>
   <Step title="Confirm the connection">
     Once authenticated, the new session appears in your Connected agents list.
@@ -39,7 +42,9 @@ If you need programmatic access to the Chiplab REST API, for CI/CD pipelines, cu
 Find the session's row and click **Revoke**.
 
 <Warning>
-  Revoking access is immediate and permanent. There's no grace period, and it can't be undone. To use Chiplab from that agent again, you'll need to reconnect and re-authenticate from scratch.
+  Revoking access is immediate and permanent.
+  There's no grace period, and it can't be undone.
+  To use Chiplab from that agent again, you'll need to reconnect and re-authenticate from scratch.
 </Warning>
 
 ## Next steps

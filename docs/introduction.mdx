@@ -3,16 +3,20 @@ title: "Introduction"
 description: "Chiplab is an MCP platform that gives AI coding agents direct access to chip-accurate firmware simulation, without any physical hardware."
 ---
 
-Chiplab is built for AI-assisted embedded development. Connect your coding agent once, and from then on you just describe what you want in plain language: "test this firmware on an STM32," "check if this build works on the nRF52840." Your agent handles the rest: uploading your binary, running it on a chip-accurate virtual board, and reporting back the results.
+Chiplab is built for AI-assisted embedded development.
+Connect your coding agent once, and from then on you just describe what you want in plain language: "test this firmware on an STM32," "check if this build works on the nRF52840."
+Your agent handles the rest: uploading your binary, running it on a chip-accurate virtual board, and reporting back the results.
 
 ## What Chiplab does
 
-Chiplab exposes its capabilities to your agent over MCP. You don't call these directly, your agent discovers and uses them automatically based on what you ask it to do.
+Chiplab exposes its capabilities to your agent over MCP.
+You don't call these directly; your agent discovers and uses them automatically based on what you ask it to do.
 
-Chiplab's tool surface is always evolving. Ask Chiplab directly (call the `ask` tool with no arguments) for the current, complete list of what's available.
+Chiplab's tool surface is always evolving.
+Ask Chiplab directly (call the `ask` tool with no arguments) for the current, complete list of what's available.
 Treat the summary below as illustrative, not a frozen contract.
 
-#### Available now
+### Available now
 
 * `ask`: Query Chiplab's knowledge base with any natural-language question about the platform, its tools, or firmware development patterns.
 * `run`: Execute firmware on a virtual chip and get back the run result, console output, and pass/fail status.
@@ -23,13 +27,17 @@ See the full reference in [Tools Overview](/tools/overview).
 
 ## Knowledge corpus
 
-Every simulation run deposits observed behavior into Chiplab's knowledge corpus, indexed by chip family, failure pattern, and board configuration. Chiplab never collects your firmware code or binaries as part of this, only the chip-level behavior observed during the run. The corpus is shared, so your agent's answers can draw on patterns observed across the platform, making each simulation more useful over time.
+Every simulation run deposits observed behavior into Chiplab's knowledge corpus, indexed by chip family, failure pattern, and board configuration.
+Chiplab never collects your firmware code or binaries as part of this, only the chip-level behavior observed during the run.
+The corpus is shared, so your agent's answers can draw on patterns observed across the platform, making each simulation more useful over time.
 
 ## Supported agents
 
-Chiplab works with any MCP-capable coding agent, with step-by-step setup guides for Cursor, OpenCode, Claude Code, Claude Desktop, VS Code, and Codex. Other MCP-capable clients, GitHub Copilot among them, connect the same way, see [Connect an Agent](/agents/overview) for the full list.
+Chiplab works with any MCP-capable coding agent, with step-by-step setup guides for Cursor, OpenCode, Claude Code, Claude Desktop, VS Code, and Codex.
+Other MCP-capable clients, GitHub Copilot among them, connect the same way; see [Connect an Agent](/agents/overview) for the full list.
 
-All of them connect to Chiplab over HTTP using the MCP protocol. Authentication is handled through a browser-based OAuth 2.0 flow, no manual token management required.
+All of them connect to Chiplab over HTTP using the MCP protocol.
+Authentication is handled through a browser-based OAuth 2.0 flow, no manual token management required.
 
 <CardGroup cols={3}>
   <Card title="Quickstart" icon="rocket" href="/quickstart">Run your first simulation in under five minutes.</Card>

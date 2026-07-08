@@ -19,18 +19,22 @@ Claude Desktop connects to remote MCP servers through **Connectors**, not throug
     https://chiplab.veecle.ai/mcp
     ```
 
-    Leave the advanced OAuth fields blank, Chiplab handles client registration automatically. Click **Add**.
+    Leave the advanced OAuth fields blank; Chiplab handles client registration automatically.
+    Click **Add**.
   </Step>
   <Step title="Connect and authenticate">
-    Click **Connect** on the new Chiplab connector. Claude opens a browser window to complete OAuth sign-in.
+    Click **Connect** on the new Chiplab connector.
+    Claude opens a browser window to complete OAuth sign-in.
   </Step>
   <Step title="Enable it in a conversation">
-    In the chat composer, click **+** → **Connectors** and toggle Chiplab on. Claude can now upload firmware and run simulations for you.
+    In the chat composer, click **+** → **Connectors** and toggle Chiplab on.
+    Claude can now upload firmware and run simulations for you.
   </Step>
 </Steps>
 
 <Warning>
-Don't add Chiplab to `claude_desktop_config.json`, that file only supports local (stdio) MCP servers and a remote URL there silently won't connect. Use the Connectors UI above.
+Don't add Chiplab to `claude_desktop_config.json`; that file only supports local (stdio) MCP servers, and a remote URL there silently won't connect.
+Use the Connectors UI above.
 </Warning>
 
 <Note>On Team and Enterprise plans, an owner must first add the connector in the organization's admin settings; members then enable it under **Settings** → **Connectors**.</Note>
