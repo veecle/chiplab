@@ -19,7 +19,7 @@ By the end, your AI coding agent will be connected to Chiplab and you'll have se
     The dashboard shows the exact commands and config snippets for your chosen agent, or see the per-agent guides below.
 
     If you're working from a clone of this repo, some agents are pre-configured: Claude Code picks up [`.mcp.json`](https://github.com/veecle/chiplab/blob/main/.mcp.json) automatically and just prompts you to trust it.
-    Otherwise, add Chiplab like any other MCP server, using the standard `mcpServers` block (or `mcp_servers` for Codex's TOML config).
+    Otherwise, add Chiplab like any other MCP server; see [Connect your agent](#connect-your-agent) below for the exact config for your client.
     On first use your client opens a browser to sign in.
   </Step>
   <Step title="Build and run an example">
@@ -51,8 +51,9 @@ By the end, your AI coding agent will be connected to Chiplab and you'll have se
 
 ## Connect your agent
 
-<CardGroup cols={3}>
+<CardGroup cols={2}>
   <Card title="Connect Cursor" icon="arrow-pointer" href="/agents/cursor">Configure Chiplab in Cursor's MCP settings and authenticate.</Card>
   <Card title="Connect OpenCode" icon="terminal" href="/agents/opencode">Register Chiplab in your OpenCode config and run the auth command.</Card>
   <Card title="Connect Claude Code" icon="comment-code" href="/agents/claude-code">Add Chiplab via the Claude CLI and authenticate with `/mcp`.</Card>
+  <Card title="Other agents" icon="ellipsis" href="/agents/overview">Claude Desktop, VS Code, Codex, and any other MCP-capable client.</Card>
 </CardGroup>
