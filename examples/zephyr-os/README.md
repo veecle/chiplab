@@ -57,7 +57,7 @@ west build -b nrf52840dk/nrf52840
 `west update`, `west sdk install`, and `west build` create `zephyr/`, `modules/`,
 `.west/`, and `build/` — all gitignored. Re-running `west build` is incremental.
 
-Then upload and run it per the [root README](../../README.md#build--run-an-example),
+Then upload and run it per the [root README](../../README.md#how-it-works),
 using the `zephyr.elf` path and the board's key.
 
 Stuck, or want this on a board we don't cover yet? We'd love to hear from you —

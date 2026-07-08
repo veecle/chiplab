@@ -121,8 +121,8 @@ Examples exist to validate Chiplab end-to-end, nothing more. Keep them minimal.
   matching board and confirm `Hello world!` in the captured output.
 - **Adding a framework?** Create `examples/<framework>/` with its own `README.md` +
   `AGENTS.md` (toolchain, build, coding notes), add a matrix column in
-  [supported-boards.md](supported-boards.md), and link it from the README's Frameworks
-  table. New chip/OS/peripheral support is server-side — open a
+  [supported-boards.md](supported-boards.md), and link it from the README's
+  "How it works" section. New chip/OS/peripheral support is server-side — open a
   [request](https://github.com/veecle/chiplab/issues/new/choose); don't add an example
   for an unsupported board.
 
