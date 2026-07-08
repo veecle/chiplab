@@ -24,13 +24,16 @@ description: "Connect VS Code's Copilot agent mode to Chiplab's MCP server and a
     }
     ```
 
-    Note the top-level key is `servers`, not `mcpServers`. To make Chiplab available in every workspace instead, run **MCP: Open User Configuration** from the Command Palette and add the same block there. You can also let VS Code write the file for you via **MCP: Add Server**.
+    Note the top-level key is `servers`, not `mcpServers`.
+    To make Chiplab available in every workspace instead, run **MCP: Open User Configuration** from the Command Palette and add the same block there.
+    You can also let VS Code write the file for you via **MCP: Add Server**.
   </Step>
   <Step title="Start the server and authenticate">
-    Save the file, then click the **Start** action that appears above the server entry. VS Code detects that Chiplab requires sign-in and opens a browser window to complete OAuth.
+    Save the file, then click the **Start** action that appears above the server entry.
+    VS Code detects that Chiplab requires sign-in and opens a browser window to complete OAuth.
   </Step>
   <Step title="Use it from agent mode">
-    Open Copilot Chat, switch to **Agent** mode, and click the tools icon, Chiplab's tools should be listed.
+    Open Copilot Chat, switch to **Agent** mode, and click the tools icon; Chiplab's tools should be listed.
   </Step>
 </Steps>
 
