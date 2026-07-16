@@ -117,6 +117,9 @@ Examples exist to validate Chiplab end-to-end, nothing more. Keep them minimal.
   footgun).
 - **No per-example README.** Board metadata lives only in
   [supported-boards.md](supported-boards.md) — add a matrix row there for any new board.
+  [docs/hardware/boards.mdx](docs/hardware/boards.mdx) mirrors this matrix for the
+  Mintlify docs site — update its table too, in the same commit, or it will silently
+  drift out of sync.
 - **Verify** by building per the framework doc, then upload + run it on the
   matching board and confirm `Hello world!` in the captured output.
 - **Adding a framework?** Create `examples/<framework>/` with its own `README.md` +
