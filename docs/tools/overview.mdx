@@ -3,51 +3,20 @@ title: "Tools Overview"
 description: "What your AI agent can do with Chiplab over MCP — illustrative, not a frozen contract."
 ---
 
-This page describes what your AI agent can do with Chiplab.
-You don't need to call anything yourself; it's reference material for the curious, not instructions to follow.
+This page describes what your AI agent can do with Chiplab. You don't need to call anything yourself; it's reference material for the curious, not instructions to follow.
 
 <Warning>
-Chiplab's exact tool names, parameters, and response shapes evolve as the platform grows.
-Call `ask` with no arguments for the current, authoritative list — everything below is illustrative as of writing, not a fixed API contract.
+  Chiplab's exact tool names, parameters, and response shapes evolve as the platform grows. Call `ask` with no arguments for the current, authoritative list — everything below is illustrative as of writing, not a fixed API contract.
 </Warning>
 
-Chiplab exposes various capabilities to your agent over MCP: asking questions, and building, uploading, and running firmware.
-Your agent discovers the concrete tool names and schemas at connect time and calls them automatically; you don't need to know the exact shapes below to use Chiplab.
+Chiplab exposes various capabilities to your agent over MCP: asking questions, and building, uploading, and running firmware. Your agent discovers the concrete tool names and schemas at connect time and calls them automatically; you don't need to know the exact shapes below to use Chiplab.
 
-## Asking questions
+<CardGroup cols={2}>
+  <Card title="ask" icon="magnifying-glass" href="/tools/ask">
+    Query Chiplab's knowledge base for platform, tool, and firmware guidance.
+  </Card>
 
-Your agent can query Chiplab's built-in knowledge base for platform, tool, and firmware guidance.
-It's purpose-built for Chiplab topics and won't answer off-topic questions.
-
-Every Chiplab session should start with a `null`/empty query, which returns a platform overview pulled straight from the knowledge base, listing the current, complete set of tools.
-A natural-language query gets routed to an AI assistant scoped to Chiplab topics, grounded in the shared [knowledge corpus](/introduction#knowledge-corpus).
-
-```json
-{ "query": null }
-```
-```json
-{ "query": "How do I upload a firmware artifact?" }
-```
-```json
-{ "query": "What boards does Chiplab support?" }
-```
-
-## Building, uploading, and running firmware
-
-Your agent produces an ELF, uploads it, runs it on a chip-accurate virtual board, and reads back the result.
-Chiplab runs your firmware on a virtual instance of the target board via a simulation platform (today that means [Renode](https://renode.io), with [QEMU](https://www.qemu.org) and more planned) and returns the console output, no physical hardware required.
-
-Depending on what's live when you connect, this might be a single call or a small sequence (e.g. issuing an upload slot, uploading the artifact, then triggering the run).
-Your agent's MCP client discovers the exact tool calls and parameters live; ask Chiplab if you want to see them yourself.
-
-A typical run, illustrated as one step for simplicity:
-
-```json
-{ "artifact_id": "a1b2c3d4-...", "board_id": "stm32f4_discovery" }
-```
-Successful response, illustrated:
-```json
-{ "run_id": "run-xyz", "stdout": "Hello from STM32F4!\n", "stderr": "" }
-```
-
-<Tip>Not sure which board fits your firmware? Ask Chiplab about individual board specs; board recommendation tooling is on the way.</Tip>
+  <Card title="run" icon="play" href="/tools/run">
+    Build, upload, and run firmware on a chip-accurate virtual board.
+  </Card>
+</CardGroup>
