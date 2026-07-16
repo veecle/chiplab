@@ -16,7 +16,9 @@ Chiplab runs the same firmware pattern across four OS/framework combinations:
 
 ## Board matrix
 
-Every board Chiplab supports today, its chip, and its **board key** — the identifier your MCP client passes when starting a run. A checkmark links to a ready-to-run example for that OS/framework (— = not available yet).
+Every board Chiplab supports today, its chip, and its **board key** — the identifier your MCP client passes when starting a run.
+A checkmark links to a ready-to-run example for that OS/framework (— = not available yet).
+The canonical copy of this matrix lives in [supported-boards.md](https://github.com/veecle/chiplab/blob/main/supported-boards.md); if the two ever diverge, that file is authoritative.
 
 | Board | Chip | Family | Board key | `bare-metal` | `embassy-rust` | `zephyr-os` | `freertos` |
 |---|---|---|---|---|---|---|---|
@@ -42,4 +44,5 @@ Runs are bounded to a fixed amount of virtual CPU time (not wall-clock time).
 
 ## Don't see your chip?
 
-Please don't hesitate to ask — requests really do shape what we add next. [Open a request](https://github.com/veecle/chiplab/issues/new/choose) on GitHub with your target MCU and use case, and our team will review it — or come say hi on [Discord](https://discord.com/invite/F6GwZJ6ktP).
+Please don't hesitate to ask — requests really do shape what we add next.
+[Open a request](https://github.com/veecle/chiplab/issues/new/choose) on GitHub with your target MCU and use case, and our team will review it — or come say hi on [Discord](https://discord.com/invite/F6GwZJ6ktP).

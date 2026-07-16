@@ -1,16 +1,21 @@
 ---
 title: "run"
 sidebarTitle: "run"
-description: "Run compiled firmware on a chip-accurate virtual board with Chiplab. Get console output and pass/fail status without physical hardware."
+description: "Run compiled firmware on a chip-accurate virtual board with Chiplab. Get captured console output without physical hardware."
 ---
 
 <Info>
-  This page describes what your AI agent can do with Chiplab. You don't need to call anything yourself, just ask your agent to run or test your firmware and it takes care of the rest. This is a reference for the curious, not a set of instructions for you to follow.
+  This page describes what your AI agent can do with Chiplab.
+  You don't need to call anything yourself, just ask your agent to run or test your firmware and it takes care of the rest.
+  This is a reference for the curious, not a set of instructions for you to follow.
 </Info>
 
-Chiplab can execute your firmware on a chip-accurate virtual board and return the console output, no physical hardware required. Chiplab runs your firmware on a virtual instance of the target board via a simulation platform (today that means [Renode](https://renode.io), with [QEMU](https://www.qemu.org) and more planned). Every supported board runs the same binary, the same peripherals, and the same interrupt timing as its physical counterpart, so what you see in Chiplab reflects what you'd see on real hardware.
+Chiplab can execute your firmware on a chip-accurate virtual board and return the console output, no physical hardware required.
+Chiplab runs your firmware on a virtual instance of the target board via a simulation platform (today that means [Renode](https://renode.io), with [QEMU](https://www.qemu.org) and more planned).
+Every supported board runs the same binary, the same peripherals, and the same interrupt timing as its physical counterpart, so what you see in Chiplab reflects what you'd see on real hardware.
 
-Depending on what's live when you connect, this might be a single call or a small sequence (e.g. issuing an upload slot, uploading the artifact, then triggering the run). Your agent's MCP client discovers the exact tool calls and parameters live; ask Chiplab if you want to see them yourself.
+Depending on what's live when you connect, this might be a single call or a small sequence (e.g. issuing an upload slot, uploading the artifact, then triggering the run).
+Your agent's MCP client discovers the exact tool calls and parameters live; ask Chiplab if you want to see them yourself.
 
 ## Parameters
 
@@ -29,11 +34,11 @@ Depending on what's live when you connect, this might be a single call or a smal
 </ResponseField>
 
 <ResponseField name="stdout" type="string">
-  All data written to standard output during the firmware simulation.
+  The captured UART/console output produced by your firmware during the simulation.
 </ResponseField>
 
 <ResponseField name="stderr" type="string">
-  All data written to standard error during the firmware simulation.
+  Simulator diagnostics emitted during the run (e.g. faults or simulation-level errors), separate from your firmware's own UART output.
 </ResponseField>
 
 ## Example calls
@@ -63,8 +68,10 @@ A successful response looks like this:
 
 ## Chip accuracy
 
-Chiplab's virtual boards are not generic CPU emulations. Each board runs your exact firmware binary against a faithful model of the target chip's peripherals, memory map, and interrupt controller, so results are directly comparable to real hardware outcomes.
+Chiplab's virtual boards are not generic CPU emulations.
+Each board runs your exact firmware binary against a faithful model of the target chip's peripherals, memory map, and interrupt controller, so results are directly comparable to real hardware outcomes.
 
 ## Knowledge corpus
 
-Every run deposits observed behavior into Chiplab's [knowledge corpus](/introduction#knowledge-corpus), indexed by chip family, failure pattern, and board configuration. Chiplab never collects your firmware code or binaries as part of this, only the chip-level behavior observed during the run.
+Every run deposits observed behavior into Chiplab's [knowledge corpus](/introduction#knowledge-corpus), indexed by chip family, failure pattern, and board configuration.
+Chiplab never collects your firmware code or binaries as part of this, only the chip-level behavior observed during the run.
