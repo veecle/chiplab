@@ -1,0 +1,53 @@
+---
+title: "ask"
+sidebarTitle: "ask"
+description: "Query the Chiplab firmware knowledge base tool. Ask about platform features, supported boards, or firmware development patterns and get answers grounded in Chiplab's documentation."
+---
+
+<Info>
+  This page describes what your AI agent can do with Chiplab. You don't need to call anything yourself, just ask your agent in plain language and it takes care of the rest. This is a reference for the curious, not a set of instructions for you to follow.
+</Info>
+
+The `ask` tool gives your AI agent direct access to Chiplab's built-in knowledge base. Use it to look up how the platform works, understand the available tools, discover supported boards, and get guidance on uploading and running firmware. The assistant behind `ask` is purpose-built for Chiplab and will not answer questions unrelated to the platform.
+
+Exact parameters may evolve as the platform grows — call `ask({ "query": null })` to confirm the current shape.
+
+## Parameters
+
+<ParamField query="query" type="string | null">
+  A natural language question about Chiplab, or `null` to receive a platform overview describing what Chiplab does and listing all available tools.
+</ParamField>
+
+## Response
+
+<ResponseField name="(string)" type="string">
+  A plain-text answer from the Chiplab assistant. When relevant, the answer includes links to the specific documentation pages it drew from.
+</ResponseField>
+
+<Note>
+  Every Chiplab session should start with `ask({ "query": null })`. It gives your agent the context it needs before uploading or running firmware.
+</Note>
+
+## Example calls
+
+Get a platform overview (recommended first call):
+
+```json
+{ "query": null }
+```
+
+Ask how to upload a firmware artifact:
+
+```json
+{ "query": "How do I upload a firmware artifact?" }
+```
+
+Discover which boards are available for simulation:
+
+```json
+{ "query": "What boards does Chiplab support?" }
+```
+
+## How it works
+
+When you call `ask` with a `null` query, Chiplab returns a platform overview directly from its knowledge base. When you pass a natural language question, Chiplab routes it to an AI assistant with access to the most relevant sections of the shared [knowledge corpus](/introduction#knowledge-corpus) and composes a focused answer. The assistant is scoped exclusively to Chiplab usage topics, so every answer is grounded in accurate, up-to-date platform documentation.

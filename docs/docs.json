@@ -7,7 +7,14 @@
     "groups": [
       { "group": "Get Started", "pages": ["introduction", "quickstart"] },
       { "group": "Agents", "pages": ["agents/overview", "agents/cursor", "agents/opencode", "agents/claude-code", "agents/claude-desktop", "agents/vs-code", "agents/codex"] },
-      { "group": "Tools", "pages": ["tools/overview"] },
+      {
+        "group": "Tools",
+        "pages": [
+          "tools/overview",
+          "tools/ask",
+          "tools/run"
+        ]
+      },
       { "group": "Hardware", "pages": ["hardware/boards"] },
       { "group": "Platform", "pages": ["platform/api-keys", "platform/usage"] }
     ]
