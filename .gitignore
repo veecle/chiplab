@@ -6,15 +6,18 @@ target/
 node_modules/
 
 # Zephyr / west workspace artifacts (pulled by `west update`, never committed).
-# The example dirs under examples/zephyr-os/ are the baseline app + manifest only;
+# examples/zephyr-os/ commits one shared west.yml plus each board's baseline app;
 # users run `west init -l . && west update` to populate the workspace below.
 .west/
 build/
 .venv/
-examples/zephyr-os/**/zephyr/
-examples/zephyr-os/**/modules/
-examples/zephyr-os/**/bootloader/
-examples/zephyr-os/**/tools/
+# west's T2 topology roots the workspace one level ABOVE the manifest repo
+# (examples/zephyr-os/), so the pulled trees land in examples/ itself, not nested
+# under examples/zephyr-os/.
+/examples/zephyr/
+/examples/modules/
+/examples/bootloader/
+/examples/tools/
 
 # FreeRTOS: the kernel is fetched by `make setup` (pinned tag), never committed.
 examples/freertos/**/freertos-kernel/
