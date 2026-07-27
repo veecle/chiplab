@@ -23,12 +23,12 @@ target per board) live in each framework's doc under
 
 | Board | Chip | Family | Board key | `bare-metal` | `embassy-rust` | `zephyr-os` | `freertos` |
 |---|---|---|---|---|---|---|---|
-| STM32F4 Discovery | STM32F407 | STM32F4 | `stm32f4_discovery` | [example](examples/bare-metal/stm32f4-discovery) | [example](examples/embassy-rust/stm32f4-discovery) | — | [example](examples/freertos/stm32f4-discovery) |
-| STM32F7 Discovery | STM32F746 | STM32F7 | `stm32f7_discovery` | [example](examples/bare-metal/stm32f7-discovery) | [example](examples/embassy-rust/stm32f7-discovery) | — | — |
+| STM32F4 Discovery | STM32F407 | STM32F4 | `stm32f4_discovery` | [example](examples/bare-metal/stm32f4-discovery) | [example](examples/embassy-rust/stm32f4-discovery) | [example](examples/zephyr-os/stm32f4-discovery) | [example](examples/freertos/stm32f4-discovery) |
+| STM32F7 Discovery | STM32F746 | STM32F7 | `stm32f7_discovery` | [example](examples/bare-metal/stm32f7-discovery) | [example](examples/embassy-rust/stm32f7-discovery) | [example](examples/zephyr-os/stm32f7-discovery) | — |
 | STM32F103 Blue Pill | STM32F103 | STM32F1 | `stm32f103_blue_pill` | [example](examples/bare-metal/stm32f103-blue-pill) | [example](examples/embassy-rust/stm32f103-blue-pill) | — | — |
 | STM32WBA52 Nucleo | STM32WBA52 | STM32WBA | `stm32wba52_nucleo` | — | [example](examples/embassy-rust/stm32wba52-nucleo) | — | — |
-| STM32L073 Nucleo | STM32L073 | STM32L0 | `stm32l073_nucleo` | [example](examples/bare-metal/stm32l073-nucleo) | [example](examples/embassy-rust/stm32l073-nucleo) | — | — |
-| STM32H745 Nucleo | STM32H745 | STM32H7 | `stm32h745_nucleo` | [example](examples/bare-metal/stm32h745-nucleo) | — | — | — |
+| STM32L073 Nucleo | STM32L073 | STM32L0 | `stm32l073_nucleo` | [example](examples/bare-metal/stm32l073-nucleo) | [example](examples/embassy-rust/stm32l073-nucleo) | [example](examples/zephyr-os/stm32l073-nucleo) | — |
+| STM32H745 Nucleo | STM32H745 | STM32H7 | `stm32h745_nucleo` | [example](examples/bare-metal/stm32h745-nucleo) | — | [example](examples/zephyr-os/stm32h745-nucleo) | — |
 | nRF52840 DK | nRF52840 | nRF52 | `nrf52840_dk` | [example](examples/bare-metal/nrf52840-dk) | [example](examples/embassy-rust/nrf52840-dk) | [example](examples/zephyr-os/nrf52840-dk) | — |
 
 ## What simulation covers

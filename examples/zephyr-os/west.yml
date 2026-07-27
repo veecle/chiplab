@@ -1,0 +1,20 @@
+# T2 ("application is the manifest repo") topology: this directory (examples/zephyr-os/)
+# IS the west manifest, shared by every board below it. `west init -l .` here, then
+# `west update` pulls Zephyr + its modules (hal_stm32, hal_nordic, …) into the workspace
+# alongside it, once, regardless of which board you build. Only this file plus each
+# board's {CMakeLists.txt,prj.conf,src/main.c} are committed; the pulled trees are
+# gitignored (see the repo-root .gitignore).
+manifest:
+  remotes:
+    - name: zephyrproject-rtos
+      url-base: https://github.com/zephyrproject-rtos
+
+  projects:
+    - name: zephyr
+      remote: zephyrproject-rtos
+      revision: v4.4.1
+      # Import Zephyr's own manifest so its HAL modules and deps come along.
+      import: true
+
+  self:
+    path: .
