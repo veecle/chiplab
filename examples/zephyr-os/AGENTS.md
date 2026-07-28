@@ -48,7 +48,7 @@ Append `-o=--depth=1` to the `west update` line to skip history as well, taking 
 - **The workspace is shared, boards are not independently copy-pasteable.**
   west's T2 topdir (`.west/`) roots one level above wherever `west init -l .` runs, but the manifest's `import: path-prefix: zephyr-os` nests the pulled `zephyr-src/` and `modules/` trees back under this directory (`examples/zephyr-os/`) instead of leaving them in `examples/`.
   Every board dir sits under `examples/zephyr-os/`, so only one `west.yml` can ever be the active manifest for the whole directory.
-  Adding a board means adding its 3 files and a `west -b` table row — never a new `west.yml`.
+  Adding a board means adding its 3 files, a `west -b` table row, and an entry in the `boards` list of [`.github/workflows/build-examples.yml`](../../.github/workflows/build-examples.yml) (CI fails on an unmapped board) — never a new `west.yml`.
   The shared manifest's `import: name-allowlist` pulls only the HAL modules the boards here actually link (`cmsis`, `cmsis_6`, `hal_stm32`, `hal_nordic`) instead of every mainline HAL — a new board needs a new allowlist entry only if it needs a HAL not already listed.
   Pin `revision:` to a released tag, not a branch, for reproducible builds.
 - **The zephyr checkout is named `zephyr-src`, not `zephyr`.**
