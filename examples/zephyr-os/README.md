@@ -1,40 +1,30 @@
 # Zephyr OS
 
-[Zephyr RTOS](https://zephyrproject.org) C firmware. Each example prints `Hello world!`
-over the board's default Zephyr console (UART), which Chiplab captures into `stdout`.
+[Zephyr RTOS](https://zephyrproject.org) C firmware.
+Each example prints `Hello world!` over the board's default Zephyr console (UART), which Chiplab captures into `stdout`.
 
-Unlike the Rust frameworks, a Zephyr build needs a **west workspace**: the Zephyr tree
-plus its HAL modules, pulled by `west`. Every board here shares **one west workspace**
-whose manifest repo is this directory (`examples/zephyr-os/`) — this repo commits one
-shared `west.yml` here plus, per board, only the **baseline application**
-(`CMakeLists.txt`, `prj.conf`, `src/main.c`). `west update` pulls the multi-GB Zephyr
-tree and HAL modules into this same directory (`zephyr-src/`, `modules/`) — you provide
-the toolchain and pull that tree yourself with `west`; it and the build output are
-gitignored.
+Unlike the Rust frameworks, a Zephyr build needs a **west workspace**: the Zephyr tree plus its HAL modules, pulled by `west`.
+Every board here shares **one west workspace** whose manifest repo is this directory (`examples/zephyr-os/`) — this repo commits one shared `west.yml` here plus, per board, only the **baseline application** (`CMakeLists.txt`, `prj.conf`, `src/main.c`).
+`west update` pulls the multi-GB Zephyr tree and HAL modules into this same directory (`zephyr-src/`, `modules/`) — you provide the toolchain and pull that tree yourself; it and the build output are gitignored.
 
 ## Toolchain
 
-You need `west`, the Zephyr SDK, **Python ≥ 3.12** (Zephyr 4.4 requires it), CMake ≥
-3.20, Ninja, and the devicetree compiler (`dtc`) — see the
-[Zephyr getting-started guide](https://docs.zephyrproject.org/latest/develop/getting_started/index.html).
-Work inside a Python virtual environment so Zephyr's build dependencies don't collide
-with the system interpreter:
+You need `west`, the Zephyr SDK, **Python ≥ 3.12** (Zephyr 4.4 requires it), CMake ≥ 3.20, Ninja, and the devicetree compiler (`dtc`) — see the [Zephyr getting-started guide][getting-started].
+Work inside a Python virtual environment so Zephyr's build dependencies don't collide with the system interpreter:
 
 ```sh
 python3.13 -m venv .venv && source .venv/bin/activate   # Python ≥ 3.12
 pip install west
 ```
 
-After `west update` (below), install Zephyr's Python requirements and the SDK into that
-same environment:
+After `west update` (below), install Zephyr's Python requirements into that same environment; the SDK unpacks into your home directory instead:
 
 ```sh
 pip install -r zephyr-src/scripts/requirements-base.txt # from examples/zephyr-os/
-west sdk install -t arm-zephyr-eabi                     # the cross-compiler
+west sdk install -t arm-zephyr-eabi                     # cross-compiler -> ~/zephyr-sdk-<version>/
 ```
 
-`west sdk install` only works once a workspace exists (after `west init` + `west
-update`).
+`west sdk install` only works once a workspace exists (after `west init` + `west update`).
 
 | Board | west `-b` board | Board key |
 |---|---|---|
@@ -46,33 +36,37 @@ update`).
 
 ## Build
 
-Every board shares one west **manifest repo** (T2 topology) rooted at this directory,
-so you initialise the workspace here once, pull the tree, install the SDK, then build
-each board into its own build dir:
+Every board shares one west **manifest repo** (T2 topology) rooted at this directory, so you initialise the workspace here once, pull the tree, install the SDK, then build each board into its own build dir:
 
 ```sh
 cd examples/zephyr-os
 python3.13 -m venv .venv && source .venv/bin/activate   # Python ≥ 3.12
 pip install west
 west init -l .                                          # this dir's west.yml is THE manifest
-west update --narrow                                    # pulls Zephyr + HAL modules, no history (network; minutes)
+west update --narrow                                    # Zephyr + HAL modules (network; minutes)
 pip install -r zephyr-src/scripts/requirements-base.txt # Zephyr's build-time Python deps
 west sdk install -t arm-zephyr-eabi                     # the cross-compiler
 west build -b nrf52840dk/nrf52840 -d build/nrf52840-dk nrf52840-dk
 # ELF: build/nrf52840-dk/zephyr/zephyr.elf
 ```
 
-`west init` and `west update` create `.west/` one level up in `examples/` (west's T2
-topdir), and `zephyr-src/` + `modules/` nested here instead, via the manifest's
-`import: path-prefix`; `west build` creates `build/` here too — all gitignored,
-shared by every board. Build a different board with its own `-d build/<board>` so builds
-don't clobber each other; re-running
-`west build` for a given board is incremental.
+`west init` and `west update` create `.west/` one level up in `examples/` (west's T2 topdir), and `zephyr-src/` + `modules/` nested here instead, via the manifest's `import: path-prefix`; `west build` creates `build/` here too — all gitignored, shared by every board.
+Build a different board with its own `-d build/<board>` so builds don't clobber each other; re-running `west build` for a given board is incremental.
 
-Then upload and run it per the [root README](../../README.md#how-it-works),
-using the `zephyr.elf` path and the board's key.
+`--narrow` fetches only each project's pinned revision rather than every branch and tag, but it still downloads that revision's full history.
+If you only want to build, add `-o=--depth=1` (the `=` is required) to fetch a single commit per project instead — that takes the pulled trees from ≈2.8 GB to ≈1.9 GB, and the build is unaffected because the checked-out files are the same revision either way:
 
-Stuck, or want this on a board we don't cover yet? We'd love to hear from you —
-[open an issue](https://github.com/veecle/chiplab/issues/new/choose) and we're glad to
-help or add boards. Writing a new example? See [AGENTS.md](AGENTS.md) for conventions
-and gotchas.
+```sh
+west update --narrow -o=--depth=1
+```
+
+The tradeoff: `git bisect` and `git blame` in the pulled trees then need `git -C zephyr-src fetch --unshallow` first, and a few Git hosts refuse shallow fetches of a SHA revision — if a fetch fails, drop the flag.
+
+Then upload and run it per the [root README](../../README.md#how-it-works), using the `zephyr.elf` path and the board's key.
+
+Stuck, or want this on a board we don't cover yet?
+We'd love to hear from you — [open an issue](https://github.com/veecle/chiplab/issues/new/choose) and we're glad to help or add boards.
+Writing a new example?
+See [AGENTS.md](AGENTS.md) for conventions and gotchas.
+
+[getting-started]: https://docs.zephyrproject.org/latest/develop/getting_started/index.html
