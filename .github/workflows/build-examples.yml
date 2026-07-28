@@ -54,3 +54,42 @@ jobs:
             (cd "${dir}" && make setup && make)
             echo "::endgroup::"
           done
+
+  zephyr:
+    name: Zephyr OS
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      # base-path is the west topdir, app-path the manifest repo inside it: init runs from
+      # examples/, whose manifest is zephyr-os/west.yml. Also installs the SDK, and fetches
+      # shallow (west update -o=--depth=1), as examples/zephyr-os/AGENTS.md documents.
+      - uses: zephyrproject-rtos/action-zephyr-setup@v1
+        with:
+          base-path: examples
+          app-path: zephyr-os
+          toolchains: arm-zephyr-eabi
+      - name: Build every zephyr-os example
+        working-directory: examples/zephyr-os
+        run: |
+          # A board dir name is not its west board name, so the mapping is explicit. Keep in
+          # sync with the table in examples/zephyr-os/AGENTS.md; the check below fails the job
+          # on an unmapped board rather than skipping it.
+          boards="nrf52840-dk:nrf52840dk/nrf52840
+          stm32f4-discovery:stm32f4_disco
+          stm32f7-discovery:stm32f746g_disco
+          stm32h745-nucleo:nucleo_h745zi_q/stm32h745xx/m7
+          stm32l073-nucleo:nucleo_l073rz"
+          for cmakelists in $(git ls-files '*/CMakeLists.txt'); do
+            dir="${cmakelists%/CMakeLists.txt}"
+            case "${boards}" in
+              *"${dir}:"*) ;;
+              *) echo "::error::zephyr-os example '${dir}' has no west board mapping in .github/workflows/build-examples.yml"; exit 1 ;;
+            esac
+          done
+          while IFS=: read -r dir board; do
+            echo "::group::${dir}"
+            west build -b "${board}" -d "build/${dir}" "${dir}"
+            echo "::endgroup::"
+          done <<EOF
+          ${boards}
+          EOF
