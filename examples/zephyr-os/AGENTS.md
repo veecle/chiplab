@@ -7,11 +7,11 @@ contract see the [root AGENTS.md](../../AGENTS.md).
 
 Needs `west` + the Zephyr SDK (plus **Python ≥ 3.12** — Zephyr 4.4 requires it — CMake ≥
 3.20, Ninja, `dtc`). Unlike the other frameworks, every board here shares **one west
-workspace**, rooted at this directory (`examples/zephyr-os/`): a single `west.yml`
-manifest lives here, and each board subfolder commits only its baseline app
-(`CMakeLists.txt`, `prj.conf`, `src/main.c`). The user pulls the Zephyr tree, Python
-deps, and SDK once with `west`/`pip`; the pulled trees, `build/`, and `.venv/` are
-gitignored — never commit them.
+workspace** whose manifest repo is this directory (`examples/zephyr-os/`): a single
+`west.yml` manifest lives here, and each board subfolder commits only its baseline app
+(`CMakeLists.txt`, `prj.conf`, `src/main.c`). `west update` pulls the Zephyr tree,
+Python deps, and SDK into this same directory once with `west`/`pip`; the pulled
+trees, `build/`, and `.venv/` are gitignored — never commit them.
 
 This directory (`examples/zephyr-os/`) is the west **manifest repo** (T2 topology),
 shared by every board below it — not each board individually:
@@ -29,8 +29,8 @@ cd examples/zephyr-os
 python3.13 -m venv .venv && source .venv/bin/activate   # Python ≥ 3.12
 pip install west
 west init -l .                                          # this dir's west.yml is THE manifest
-west update                                             # pulls Zephyr + HAL modules, once
-pip install -r zephyr/scripts/requirements-base.txt    # Zephyr's build-time Python deps
+west update --narrow                                    # pulls Zephyr + HAL modules, no history
+pip install -r zephyr-src/scripts/requirements-base.txt   # Zephyr's build-time Python deps
 west sdk install -t arm-zephyr-eabi                     # the cross-compiler
 west build -b <west-board> -d build/<board> <board>    # e.g. -d build/nrf52840-dk nrf52840-dk
 # ELF: build/<board>/zephyr/zephyr.elf
@@ -51,12 +51,25 @@ west build -b <west-board> -d build/<board> <board>    # e.g. -d build/nrf52840-
 ## Gotchas
 
 - **The workspace is shared, boards are not independently copy-pasteable.** west's T2
-  topology roots the workspace one level above wherever `west init -l .` runs; because
-  every board dir sits under `examples/zephyr-os/`, only one `west.yml` can ever be the
-  active manifest for the whole directory. Adding a board means adding its 3 files and a
-  `west -b` table row — never a new `west.yml`. `import: true` in the shared manifest
-  already pulls every mainline HAL (`hal_stm32`, `hal_nordic`, …), so no board needs its
-  own import. Pin `revision:` to a released tag, not a branch, for reproducible builds.
+  topdir (`.west/`) roots one level above wherever `west init -l .` runs, but the
+  manifest's `import: path-prefix: zephyr-os` nests the pulled `zephyr-src/` and
+  `modules/` trees back under this directory (`examples/zephyr-os/`) instead of leaving them in
+  `examples/`. Every board dir sits under `examples/zephyr-os/`, so only one `west.yml`
+  can ever be the active manifest for the whole directory. Adding a board means adding
+  its 3 files and a `west -b` table row — never a new `west.yml`. The shared manifest's
+  `import: name-allowlist` pulls only the HAL modules the boards here actually link
+  (`cmsis`, `cmsis_6`, `hal_stm32`, `hal_nordic`) instead of every mainline HAL — a new
+  board needs a new allowlist entry only if it needs a HAL not already listed. Pin
+  `revision:` to a released tag, not a branch, for reproducible builds.
+- **The zephyr checkout is named `zephyr-src`, not `zephyr`.** West's own module
+  auto-detection (`zephyr_module.py`) treats any directory that directly contains
+  both `zephyr/CMakeLists.txt` and `zephyr/Kconfig` as an unmarked module. Since the
+  checkout nests inside this self/manifest repo, a literal `zephyr` leaf name would
+  make `examples/zephyr-os/` itself match that heuristic (its own `zephyr/` subdir
+  *is* Zephyr's top-level `CMakeLists.txt` + `Kconfig`), registering a phantom module
+  whose Kconfig re-sources `Kconfig.zephyr` — an infinite `recursive 'source'` CMake
+  error. The explicit `path: zephyr-src` on the `zephyr` project in `west.yml` avoids
+  this; don't rename it back to `zephyr` without re-checking this collision.
 - **Build each board into its own `-d build/<board>` dir.** Reusing the default
   `build/` for every board clobbers the previous board's build; the ELF is
   `build/<board>/zephyr/zephyr.elf`, not `hello-<board>` — Zephyr fixes the output name.
@@ -70,7 +83,7 @@ west build -b <west-board> -d build/<board> <board>    # e.g. -d build/nrf52840-
   (e.g. `jsonschema`) lack wheels for the newest releases. Python 3.13 in a venv is the
   safe choice. The CMake error `Missing jsonschema dependency` means the build-time
   requirements aren't installed in the active interpreter — `pip install -r
-  zephyr/scripts/requirements-base.txt`.
+  zephyr-src/scripts/requirements-base.txt`.
 - **STM32H745 is dual-core** — target the Cortex-M7 core qualifier
   (`nucleo_h745zi_q/stm32h745xx/m7`); the board's default console (`usart3`) is only
   wired up on that core's defconfig.

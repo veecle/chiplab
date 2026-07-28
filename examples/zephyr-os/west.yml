@@ -1,10 +1,13 @@
 # T2 ("application is the manifest repo") topology: this directory (examples/zephyr-os/)
 # IS the west manifest, shared by every board below it. `west init -l .` here, then
-# `west update` pulls Zephyr + its modules (hal_stm32, hal_nordic, …) into the workspace
-# alongside it, once, regardless of which board you build. Only this file plus each
-# board's {CMakeLists.txt,prj.conf,src/main.c} are committed; the pulled trees are
-# gitignored (see the repo-root .gitignore).
+# `west update` pulls Zephyr + its modules (hal_stm32, hal_nordic, …) into the workspace,
+# nested under this directory (via `import: path-prefix`, below) once, regardless of
+# which board you build. Only this file plus each board's
+# {CMakeLists.txt,prj.conf,src/main.c} are committed; the pulled trees are gitignored
+# (see the repo-root .gitignore).
 manifest:
+  version: "0.8"
+
   remotes:
     - name: zephyrproject-rtos
       url-base: https://github.com/zephyrproject-rtos
@@ -13,8 +16,30 @@ manifest:
     - name: zephyr
       remote: zephyrproject-rtos
       revision: v4.4.1
-      # Import Zephyr's own manifest so its HAL modules and deps come along.
-      import: true
+      # Explicit path (not the default-derived "zephyr"): west's own module
+      # auto-detection (zephyr_module.py) treats any directory that directly
+      # contains both zephyr/CMakeLists.txt and zephyr/Kconfig as an unmarked
+      # module. Since path-prefix nests this checkout inside the self/manifest
+      # repo (examples/zephyr-os/), a literal "zephyr" leaf name would make
+      # examples/zephyr-os/ itself match that heuristic (its own zephyr/
+      # subdir *is* Zephyr's top-level CMakeLists.txt + Kconfig) and get
+      # registered as a phantom module whose Kconfig recursively re-sources
+      # Kconfig.zephyr -> infinite "recursive 'source'" CMake error. Renaming
+      # the leaf to zephyr-src avoids the collision entirely.
+      path: zephyr-src
+      # Import only the HAL modules these boards actually link (verified against
+      # build output): cmsis/cmsis_6 are header-only deps required unconditionally
+      # for ARM Cortex-M (HAS_CMSIS_CORE), hal_stm32/hal_nordic are the linked HALs.
+      # Trims the pulled tree from ~9GB to a fraction of that. `path-prefix` nests
+      # zephyr-src/ and modules/ under this directory instead of one level up in
+      # examples/ (west's T2 topdir is still examples/ — only the checkout paths move).
+      import:
+        name-allowlist:
+          - cmsis
+          - cmsis_6
+          - hal_stm32
+          - hal_nordic
+        path-prefix: zephyr-os
 
   self:
     path: .

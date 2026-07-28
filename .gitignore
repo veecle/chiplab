@@ -11,13 +11,11 @@ node_modules/
 .west/
 build/
 .venv/
-# west's T2 topology roots the workspace one level ABOVE the manifest repo
-# (examples/zephyr-os/), so the pulled trees land in examples/ itself, not nested
-# under examples/zephyr-os/.
-/examples/zephyr/
-/examples/modules/
-/examples/bootloader/
-/examples/tools/
+# the manifest's `import: path-prefix: zephyr-os` nests the pulled trees under
+# examples/zephyr-os/ instead of leaving them one level up in examples/ (west's
+# T2 topdir is still examples/ — only the checkout paths are prefixed).
+/examples/zephyr-os/zephyr-src/
+/examples/zephyr-os/modules/
 
 # FreeRTOS: the kernel is fetched by `make setup` (pinned tag), never committed.
 examples/freertos/**/freertos-kernel/
