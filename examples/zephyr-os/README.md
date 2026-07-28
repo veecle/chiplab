@@ -4,11 +4,13 @@
 over the board's default Zephyr console (UART), which Chiplab captures into `stdout`.
 
 Unlike the Rust frameworks, a Zephyr build needs a **west workspace**: the Zephyr tree
-plus its HAL modules, pulled by `west`. Every board shares **one workspace**, rooted at
-this directory (`examples/zephyr-os/`) — this repo commits one shared `west.yml` here
-plus, per board, only the **baseline application** (`CMakeLists.txt`, `prj.conf`,
-`src/main.c`). You provide the toolchain and pull the tree yourself with `west`; the
-pulled trees and build output are gitignored.
+plus its HAL modules, pulled by `west`. Every board here shares **one west workspace**
+whose manifest repo is this directory (`examples/zephyr-os/`) — this repo commits one
+shared `west.yml` here plus, per board, only the **baseline application**
+(`CMakeLists.txt`, `prj.conf`, `src/main.c`). `west update` pulls the multi-GB Zephyr
+tree and HAL modules into this same directory (`zephyr-src/`, `modules/`) — you provide
+the toolchain and pull that tree yourself with `west`; it and the build output are
+gitignored.
 
 ## Toolchain
 
@@ -27,7 +29,7 @@ After `west update` (below), install Zephyr's Python requirements and the SDK in
 same environment:
 
 ```sh
-pip install -r zephyr/scripts/requirements-base.txt   # from examples/zephyr-os/
+pip install -r zephyr-src/scripts/requirements-base.txt # from examples/zephyr-os/
 west sdk install -t arm-zephyr-eabi                     # the cross-compiler
 ```
 
@@ -53,16 +55,18 @@ cd examples/zephyr-os
 python3.13 -m venv .venv && source .venv/bin/activate   # Python ≥ 3.12
 pip install west
 west init -l .                                          # this dir's west.yml is THE manifest
-west update                                             # pulls Zephyr + HAL modules (network; minutes)
-pip install -r zephyr/scripts/requirements-base.txt    # Zephyr's build-time Python deps
+west update --narrow                                    # pulls Zephyr + HAL modules, no history (network; minutes)
+pip install -r zephyr-src/scripts/requirements-base.txt # Zephyr's build-time Python deps
 west sdk install -t arm-zephyr-eabi                     # the cross-compiler
 west build -b nrf52840dk/nrf52840 -d build/nrf52840-dk nrf52840-dk
 # ELF: build/nrf52840-dk/zephyr/zephyr.elf
 ```
 
-`west update`, `west sdk install`, and `west build` create `zephyr/`, `modules/`,
-`.west/`, and `build/` — all gitignored, shared by every board. Build a different board
-with its own `-d build/<board>` so builds don't clobber each other; re-running
+`west init` and `west update` create `.west/` one level up in `examples/` (west's T2
+topdir), and `zephyr-src/` + `modules/` nested here instead, via the manifest's
+`import: path-prefix`; `west build` creates `build/` here too — all gitignored,
+shared by every board. Build a different board with its own `-d build/<board>` so builds
+don't clobber each other; re-running
 `west build` for a given board is incremental.
 
 Then upload and run it per the [root README](../../README.md#how-it-works),
