@@ -81,10 +81,8 @@ jobs:
           stm32l073-nucleo:nucleo_l073rz"
           for cmakelists in $(git ls-files '*/CMakeLists.txt'); do
             dir="${cmakelists%/CMakeLists.txt}"
-            case "${boards}" in
-              *"${dir}:"*) ;;
-              *) echo "::error::zephyr-os example '${dir}' has no west board mapping in .github/workflows/build-examples.yml"; exit 1 ;;
-            esac
+            printf '%s\n' "${boards}" | grep -q "^${dir}:" \
+              || { echo "::error::zephyr-os example '${dir}' has no west board mapping in .github/workflows/build-examples.yml"; exit 1; }
           done
           while IFS=: read -r dir board; do
             echo "::group::${dir}"
