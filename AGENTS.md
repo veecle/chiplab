@@ -137,8 +137,7 @@ Examples exist to validate Chiplab end-to-end, nothing more. Keep them minimal.
 - Cross-compilation happens on your side; Chiplab runs the ELF as-is.
 - Simulations are bounded to a fixed amount of virtual time; the captured output is
   the UART capture.
-- Boards are supported across the STM32 and Nordic nRF families, each with a
-  `bare-metal` and/or `embassy-rust` example. See
+- Boards are supported across the STM32 and Nordic nRF families. See
   [supported-boards.md](supported-boards.md) for the full board list, and
   call the discovery/help tool for the authoritative, up-to-date set.
 - To run your own firmware, build an ELF for the matching target and repeat the
