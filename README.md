@@ -3,6 +3,8 @@
 > Simulate & validate firmware on virtual instances of real chips, straight from your AI coding agent — no hardware.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.com/invite/F6GwZJ6ktP)
+[![GitHub stars](https://img.shields.io/github/stars/veecle/chiplab?style=social)](https://github.com/veecle/chiplab)
 
 Chiplab is a hosted MCP service.
 Your AI coding agent connects to it, uploads compiled firmware, runs it on a virtual instance of a real microcontroller, and reads back the UART output.
