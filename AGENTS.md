@@ -14,11 +14,12 @@ the [README](README.md) for the human-facing pitch.)
 This repo ships ready-to-run examples for **every supported board**, grouped by
 framework — currently `bare-metal` (vendor-HAL / direct-register), `embassy-rust`
 (the [Embassy](https://embassy.dev) async runtime), `zephyr-os` (C on the
-[Zephyr RTOS](https://zephyrproject.org), built with `west`), and `freertos` (C on the
-[FreeRTOS](https://www.freertos.org) kernel, built with `make`), each documented in
-`examples/<framework>/`. A user can open this repo, connect their
-agent to Chiplab, and say *"install Chiplab and test it on &lt;board&gt;"* — everything
-an agent needs to do that is below.
+[Zephyr RTOS](https://zephyrproject.org), built with `west`), `freertos` (C on the
+[FreeRTOS](https://www.freertos.org) kernel, built with `make`), and `threadx` (C on the
+[Eclipse ThreadX](https://github.com/eclipse-threadx/threadx) kernel, built with
+`make`), each documented in `examples/<framework>/`. A user can open this repo, connect
+their agent to Chiplab, and say *"install Chiplab and test it on &lt;board&gt;"* —
+everything an agent needs to do that is below.
 
 ## 1. Install / connect Chiplab
 

@@ -19,3 +19,6 @@ build/
 
 # FreeRTOS: the kernel is fetched by `make setup` (pinned tag), never committed.
 examples/freertos/**/freertos-kernel/
+
+# ThreadX: the kernel is fetched by `make setup` (pinned tag), never committed.
+examples/threadx/**/threadx-kernel/
