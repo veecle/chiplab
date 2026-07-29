@@ -39,3 +39,18 @@ jobs:
             (cd "${dir}" && make setup && make)
             echo "::endgroup::"
           done
+
+  threadx:
+    name: ThreadX
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install arm-none-eabi-gcc
+        run: sudo apt-get update && sudo apt-get install -y gcc-arm-none-eabi
+      - name: Build every threadx example
+        run: |
+          for dir in examples/threadx/*/; do
+            echo "::group::${dir}"
+            (cd "${dir}" && make setup && make)
+            echo "::endgroup::"
+          done
