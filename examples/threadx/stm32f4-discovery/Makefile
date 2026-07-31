@@ -65,8 +65,11 @@ $(BUILD_DIR)/%.o: %.s
 	@mkdir -p $(dir $@)
 	$(CC) $(ARCH_FLAGS) -c $< -o $@
 
+# The second test catches `make setup all`: C_SOURCES is wildcarded at parse time, so a
+# kernel cloned by an earlier target in the same run contributes no objects to the link.
 check-kernel:
 	@test -d $(KERNEL_DIR) || { echo "ThreadX kernel missing — run 'make setup' first."; exit 1; }
+	@test -n "$(filter $(KERNEL_DIR)/%,$(C_SOURCES))" || { echo "Kernel was fetched after this make started — run 'make' again."; exit 1; }
 
 clean:
 	rm -rf $(BUILD_DIR)
