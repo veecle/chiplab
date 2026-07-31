@@ -5,6 +5,8 @@
 
 #include <stdint.h>
 
+#include "tx_api.h"
+
 #define SCB_VTOR              ( *( volatile uint32_t * )0xE000ED08UL )
 #define SCB_SHPR2             ( *( volatile uint32_t * )0xE000ED1CUL )
 #define SCB_SHPR3             ( *( volatile uint32_t * )0xE000ED20UL )
@@ -16,7 +18,6 @@
 #define SYSTICK_CTRL_CLKSOURCE ( 1UL << 2 )
 
 #define SYSTEM_CLOCK_HZ       16000000UL
-#define TICKS_PER_SECOND      100UL
 
 /* Defined by the linker script and the startup file. */
 extern uint32_t _estack;
@@ -43,7 +44,7 @@ void _tx_initialize_low_level( void )
     SCB_SHPR2 = 0xFF000000UL;
     SCB_SHPR3 = 0x40FF0000UL;
 
-    SYSTICK_LOAD = ( SYSTEM_CLOCK_HZ / TICKS_PER_SECOND ) - 1UL;
+    SYSTICK_LOAD = ( SYSTEM_CLOCK_HZ / TX_TIMER_TICKS_PER_SECOND ) - 1UL;
     SYSTICK_CTRL = SYSTICK_CTRL_CLKSOURCE | SYSTICK_CTRL_TICKINT | SYSTICK_CTRL_ENABLE;
 }
 

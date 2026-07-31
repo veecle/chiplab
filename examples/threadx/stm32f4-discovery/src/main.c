@@ -57,7 +57,7 @@ static void uart_write( const char *s )
         while( !( USART2_SR & USART_SR_TXE ) )
         {
         }
-        USART2_DR = ( uint32_t )( uint8_t ) * s++;
+        USART2_DR = ( uint32_t )( uint8_t )*s++;
     }
     /* Block until the last byte has fully shifted out, so the simulation window
      * doesn't close with bytes still sitting in the TX register. */
