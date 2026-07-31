@@ -63,7 +63,7 @@ jobs:
       # base-path is the west topdir, app-path the manifest repo inside it: init runs from
       # examples/, whose manifest is zephyr-os/west.yml. Also installs the SDK, and fetches
       # shallow (west update -o=--depth=1), as examples/zephyr-os/AGENTS.md documents.
-      - uses: zephyrproject-rtos/action-zephyr-setup@v1
+      - uses: zephyrproject-rtos/action-zephyr-setup@be8136a8bba01580485d98b7ad2d32477c36a49a # v1.0.15
         with:
           base-path: examples
           app-path: zephyr-os
