@@ -32,8 +32,9 @@ make           # arm-none-eabi-gcc
 - One header comment line in `main.c` naming the board and UART. No vendor HAL — drive
   the UART with direct register writes (see the bare-metal example for the same pattern).
 - Compile: kernel core (`tasks.c`, `list.c`, `queue.c`, `timers.c`), the port
-  (`portable/GCC/<port>/port.c`), one heap (`portable/MemMang/heap_4.c`), plus the
-  example's `startup_<chip>.s`.
+  (`portable/GCC/<port>/port.c`; the `ARM_CM0` port additionally needs its
+  `portasm.c`), one heap (`portable/MemMang/heap_4.c`), plus the example's
+  `startup_<chip>.s`.
 - Keep `configUSE_TIMERS` and other kernel features off unless the example needs them.
 - Pin the kernel to a release tag in the `Makefile` (`KERNEL_TAG`), not a branch.
 
@@ -62,7 +63,9 @@ make           # arm-none-eabi-gcc
   the `SW` write as fire-and-forget — polling `SWS` to confirm the switch spins forever
   in simulation.
 - **STM32H745** is dual-core; this example targets the Cortex-M7 (the
-  `GCC/ARM_CM7/r0p1` port).
+  `GCC/ARM_CM7/r0p1` port). It is a second clock exception: its `configCPU_CLOCK_HZ`
+  and USART `BRR` assume 16 MHz like the F4/F7 examples (validated on Chiplab), not
+  the chip's 64 MHz reset-default HSI — see the note in its `main.c`.
 - **Tickless idle off** — leave `configUSE_TICKLESS_IDLE` disabled; sleep modes can
   stall the simulation.
 - **The ELF is `build/hello-<board>.elf`** — upload that path.
