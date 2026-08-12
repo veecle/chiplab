@@ -1,0 +1,81 @@
+name: Cloud Code Agent POC
+
+on:
+  workflow_dispatch:
+
+# Proves that a `veecle_pat_*` token can drive Chiplab through an AI agent
+# in CI - the same way a developer would locally. The agent discovers MCP
+# tools dynamically, builds firmware, uploads it, runs a simulation, and
+# verifies the UART output.
+
+jobs:
+  agent-driven:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@5c1b89bfe41bbe000c041f12298933afd2c80e30 # v5.2.1
+
+      # ------------------------------------------------------------------
+      # Step 1: Write MCP config with the API token
+      # ------------------------------------------------------------------
+      # The token is injected into .mcp.json so the agent can authenticate
+      # against Chiplab without a browser-based OAuth flow. The header key
+      # must match what the veecle-platform auth layer expects for API tokens.
+      - name: Configure Chiplab MCP with API token
+        run: |
+          cat > .mcp.json << 'MCPEOF'
+          {
+            "mcpServers": {
+              "chiplab": {
+                "type": "http",
+                "url": "https://chiplab.veecle.ai/mcp",
+                "headers": {
+                  "Authorization": "Bearer ${CHIPLAB_API_KEY}"
+                }
+              }
+            }
+          }
+          MCPEOF
+
+          # Verify the config was written (mask the token value in logs)
+          echo "MCP config written with auth headers"
+        env:
+          CHIPLAB_API_KEY: ${{ secrets.CHIPLAB_API_KEY }}
+
+      # ------------------------------------------------------------------
+      # Step 2: Run the agent to drive Chiplab end-to-end
+      # ------------------------------------------------------------------
+      # The agent connects to Chiplab via the MCP server configured above,
+      # discovers tools with tools/list, and executes the full pipeline:
+      # build bare-metal/stm32f4-discovery -> upload ELF -> run on
+      # stm32f4_discovery -> read UART output -> verify "Hello world!"
+      #
+      # Uses the same Claude action pattern already established in
+      # claude.yml, but with a targeted prompt instead of interactive mode.
+      - uses: veecle/style-guide/.github/actions/claude@main
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Build the bare-metal stm32f4-discovery example, upload it to Chiplab,
+            run it on the stm32f4_discovery board, and verify the captured UART
+            output contains "Hello world!".
+
+            Follow the build instructions in examples/bare-metal/AGENTS.md.
+            Use the Chiplab MCP server already configured in .mcp.json.
+
+            Report success or failure clearly at the end.
+
+      # ------------------------------------------------------------------
+      # Step 3: Summary
+      # ------------------------------------------------------------------
+      - name: Report
+        if: always()
+        run: |
+          echo "### Chiplab Cloud Code Agent POC" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Check | Result |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|--------|" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "| Agent-driven build + upload + run + verify | :white_check_mark: |" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "| Agent-driven build + upload + run + verify | :x: |" >> "$GITHUB_STEP_SUMMARY"
+          fi

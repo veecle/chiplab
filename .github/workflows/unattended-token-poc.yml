@@ -1,0 +1,259 @@
+name: Unattended Token POC
+
+on:
+  workflow_dispatch:
+
+# Proves that a veecle_pat_* token stored as a GitHub Actions secret can:
+# 1. Authenticate against the Chiplab MCP server from CI (no browser, no OAuth)
+# 2. Call MCP tools (upload a built ELF, run a simulation, read back UART output)
+# 3. Serve as a smoke test that the full upload -> run -> read loop works unattended
+
+jobs:
+  build-and-run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # ------------------------------------------------------------------
+      # Step 1: Build the stm32f4-discovery bare-metal example
+      # ------------------------------------------------------------------
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: thumbv7m-none-eabi
+
+      - name: Build hello-stm32f4-discovery
+        working-directory: examples/bare-metal/stm32f4-discovery
+        run: cargo build --release
+
+      - name: Verify ELF exists
+        run: |
+          ELF="examples/bare-metal/stm32f4-discovery/target/thumbv7m-none-eabi/release/hello-stm32f4-discovery"
+          if [ ! -f "$ELF" ]; then
+            echo "::error::ELF not found at $ELF"
+            exit 1
+          fi
+          echo "ELF_PATH=$ELF" >> "$GITHUB_ENV"
+          echo "ELF_SIZE=$(stat -c%s "$ELF")" >> "$GITHUB_ENV"
+
+      # ------------------------------------------------------------------
+      # Step 2: Initialize MCP session
+      # ------------------------------------------------------------------
+      - name: Initialize MCP connection
+        env:
+          CHIPLAB_MCP_URL: https://chiplab.veecle.ai/mcp
+          CHIPLAB_API_KEY: ${{ secrets.CHIPLAB_API_KEY }}
+        run: |
+          RESPONSE=$(curl -sS --fail \
+            -H "Authorization: Bearer ${CHIPLAB_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/json" \
+            -d '{"jsonrpc":"2.0","method":"initialize","id":1,"params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"github-actions-ci","version":"1.0.0"}}}' \
+            "${CHIPLAB_MCP_URL}")
+
+          echo "Initialize response:"
+          echo "$RESPONSE" | jq .
+
+          # Extract the session ID from the response
+          SESSION_ID=$(echo "$RESPONSE" | jq -r '.meta."mcp-session-id" // .params."mcp-session-id" // empty')
+          if [ -z "$SESSION_ID" ]; then
+            # Try the response header approach - curl writes headers to stderr
+            SESSION_ID=$(echo "$RESPONSE" | jq -r '.result.protocolVersion // empty')
+          fi
+
+          # Check for auth errors
+          ERROR_CODE=$(echo "$RESPONSE" | jq -r '.error.code // "none"')
+          if [ "$ERROR_CODE" != "none" ]; then
+            ERROR_MSG=$(echo "$RESPONSE" | jq -r '.error.message // "unknown"')
+            echo "::error::Initialize failed: $ERROR_MSG (code: $ERROR_CODE)"
+            exit 1
+          fi
+
+          echo "::notice::MCP session initialized successfully"
+
+      # ------------------------------------------------------------------
+      # Step 3: Get an upload ticket
+      # ------------------------------------------------------------------
+      - name: Issue upload ticket
+        env:
+          CHIPLAB_MCP_URL: https://chiplab.veecle.ai/mcp
+          CHIPLAB_API_KEY: ${{ secrets.CHIPLAB_API_KEY }}
+        id: upload_ticket
+        run: |
+          RESPONSE=$(curl -sS --fail \
+            -H "Authorization: Bearer ${CHIPLAB_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/json" \
+            -d '{"jsonrpc":"2.0","method":"tools/call","id":2,"params":{"name":"issue_upload_ticket","arguments":{}}}' \
+            "${CHIPLAB_MCP_URL}")
+
+          echo "Upload ticket response:"
+          echo "$RESPONSE" | jq .
+
+          ERROR_CODE=$(echo "$RESPONSE" | jq -r '.error.code // "none"')
+          if [ "$ERROR_CODE" != "none" ]; then
+            echo "::error::Failed to get upload ticket"
+            exit 1
+          fi
+
+          # Extract the artifact ID and upload URL from the tool result content
+          TOOL_CONTENT=$(echo "$RESPONSE" | jq -r '.result.content[0].text // empty')
+          if [ -z "$TOOL_CONTENT" ]; then
+            echo "::error::No content in tool response"
+            exit 1
+          fi
+
+          ARTIFACT_ID=$(echo "$TOOL_CONTENT" | jq -r '.artifact_id // empty')
+          UPLOAD_URL=$(echo "$TOOL_CONTENT" | jq -r '.upload_url // empty')
+
+          if [ -z "$ARTIFACT_ID" ] || [ -z "$UPLOAD_URL" ]; then
+            echo "::error::Missing artifact_id or upload_url in ticket response"
+            exit 1
+          fi
+
+          echo "artifact_id=$ARTIFACT_ID" >> "$GITHUB_OUTPUT"
+          echo "upload_url=$UPLOAD_URL" >> "$GITHUB_OUTPUT"
+
+          echo "::notice::Upload ticket issued, artifact_id=$ARTIFACT_ID"
+
+      # ------------------------------------------------------------------
+      # Step 4: Upload the ELF
+      # ------------------------------------------------------------------
+      - name: Upload ELF to presigned URL
+        run: |
+          echo "Uploading ${{ env.ELF_PATH }} (${{ env.ELF_SIZE }} bytes)"
+          HTTP_CODE=$(curl -sS -o /dev/null -w "%{http_code}" \
+            --upload-file "${{ env.ELF_PATH }}" \
+            "${{ steps.upload_ticket.outputs.upload_url }}")
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::Upload failed with HTTP $HTTP_CODE"
+            exit 1
+          fi
+
+          echo "::notice::ELF uploaded successfully"
+
+      # ------------------------------------------------------------------
+      # Step 5: Run the simulation
+      # ------------------------------------------------------------------
+      - name: Run on stm32f4_discovery
+        env:
+          CHIPLAB_MCP_URL: https://chiplab.veecle.ai/mcp
+          CHIPLAB_API_KEY: ${{ secrets.CHIPLAB_API_KEY }}
+        id: run
+        run: |
+          RESPONSE=$(curl -sS --fail \
+            -H "Authorization: Bearer ${CHIPLAB_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/json" \
+            -d "{\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"id\":3,\"params\":{\"name\":\"run\",\"arguments\":{\"artifact_id\":\"${{ steps.upload_ticket.outputs.artifact_id }}\",\"board_id\":\"stm32f4_discovery\"}}}" \
+            "${CHIPLAB_MCP_URL}")
+
+          echo "Run response:"
+          echo "$RESPONSE" | jq .
+
+          ERROR_CODE=$(echo "$RESPONSE" | jq -r '.error.code // "none"')
+          if [ "$ERROR_CODE" != "none" ]; then
+            echo "::error::Simulation run failed"
+            exit 1
+          fi
+
+          TOOL_CONTENT=$(echo "$RESPONSE" | jq -r '.result.content[0].text // empty')
+          if [ -z "$TOOL_CONTENT" ]; then
+            echo "::error::No content in run response"
+            exit 1
+          fi
+
+          RUN_ID=$(echo "$TOOL_CONTENT" | jq -r '.run_id // empty')
+          if [ -z "$RUN_ID" ]; then
+            echo "::error::Missing run_id in run response"
+            exit 1
+          fi
+
+          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+
+          # Log the artifact list
+          ARTIFACTS=$(echo "$TOOL_CONTENT" | jq -r '.artifacts[] // empty')
+          echo "Run $RUN_ID produced artifacts: $ARTIFACTS"
+
+          echo "::notice::Simulation completed, run_id=$RUN_ID"
+
+      # ------------------------------------------------------------------
+      # Step 6: Get download URL for the UART output
+      # ------------------------------------------------------------------
+      - name: Download UART output
+        env:
+          CHIPLAB_MCP_URL: https://chiplab.veecle.ai/mcp
+          CHIPLAB_API_KEY: ${{ secrets.CHIPLAB_API_KEY }}
+        run: |
+          # First list artifacts to find the UART output name
+          RESPONSE=$(curl -sS --fail \
+            -H "Authorization: Bearer ${CHIPLAB_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/json" \
+            -d "{\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"id\":4,\"params\":{\"name\":\"list_run_artifacts\",\"arguments\":{\"run_id\":\"${{ steps.run.outputs.run_id }}\"}}}" \
+            "${CHIPLAB_MCP_URL}")
+
+          echo "List artifacts response:"
+          echo "$RESPONSE" | jq .
+
+          TOOL_CONTENT=$(echo "$RESPONSE" | jq -r '.result.content[0].text // empty')
+          if [ -z "$TOOL_CONTENT" ]; then
+            echo "::error::No content in list_run_artifacts response"
+            exit 1
+          fi
+
+          # The response contains artifact names; pick the UART output (usually "uart0.log" or similar)
+          UART_ARTIFACT=$(echo "$TOOL_CONTENT" | jq -r '.[0] // empty')
+          if [ -z "$UART_ARTIFACT" ]; then
+            echo "::error::No artifacts found for run"
+            exit 1
+          fi
+
+          echo "Found artifact: $UART_ARTIFACT"
+
+          # Now get a download ticket for it
+          RESPONSE=$(curl -sS --fail \
+            -H "Authorization: Bearer ${CHIPLAB_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/json" \
+            -d "{\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"id\":5,\"params\":{\"name\":\"issue_download_ticket\",\"arguments\":{\"run_id\":\"${{ steps.run.outputs.run_id }}\",\"artifact_name\":\"$UART_ARTIFACT\"}}}" \
+            "${CHIPLAB_MCP_URL}")
+
+          echo "Download ticket response:"
+          echo "$RESPONSE" | jq .
+
+          TOOL_CONTENT=$(echo "$RESPONSE" | jq -r '.result.content[0].text // empty')
+          DOWNLOAD_URL=$(echo "$TOOL_CONTENT" | jq -r '.download_url // empty')
+
+          if [ -z "$DOWNLOAD_URL" ]; then
+            echo "::error::No download_url in ticket response"
+            exit 1
+          fi
+
+          # Download and display the UART output
+          UART_OUTPUT=$(curl -sS --fail "$DOWNLOAD_URL")
+          echo "=== UART Output ==="
+          echo "$UART_OUTPUT"
+          echo "==================="
+
+          if ! echo "$UART_OUTPUT" | grep -q "Hello world!"; then
+            echo "::error::Expected 'Hello world!' in UART output but not found"
+            exit 1
+          fi
+
+          echo "::notice::UART output verified: Hello world! found"
+
+      # ------------------------------------------------------------------
+      # Step 7: Summary
+      # ------------------------------------------------------------------
+      - name: Report
+        run: |
+          echo "### Chiplab Unattended Token POC - PASSED" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Check | Result |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|--------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Token auth | :white_check_mark: |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Build ELF | :white_check_mark: |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Upload ELF | :white_check_mark: |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Simulate on stm32f4-discovery | :white_check_mark: |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Verify 'Hello world!' output | :white_check_mark: |" >> "$GITHUB_STEP_SUMMARY"
