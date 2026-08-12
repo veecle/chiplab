@@ -25,8 +25,7 @@ jobs:
         github.event_name == 'issue_comment'
         && github.event.issue.pull_request
         && contains(github.event.comment.body, '/chiplab-smoke')
-        && github.event.comment.user.type != 'Bot'
-      )
+        && github.event.comment.user.type != 'Bot'        && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)      )
     env:
       CHIPLAB_API_KEY: ${{ secrets.CHIPLAB_API_KEY }}
     permissions:
@@ -35,19 +34,25 @@ jobs:
       id-token: write
       actions: read
     steps:
+      # Check out the PR head even on issue_comment events.
+      # On pull_request events github.ref is already the merge ref;
+      # on issue_comment it defaults to main, which would build the
+      # wrong code.
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event_name == 'issue_comment' && format('refs/pull/{0}/head', github.event.issue.number) || github.ref }}
 
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: thumbv7m-none-eabi
 
-      # Inject the API key into .mcp.json so Claude can authenticate to the
-      # Chiplab MCP server. The raw .mcp.json in the repo has no auth headers
-      # because local dev uses browser-based OAuth.
-      - name: Inject Chiplab API key into MCP config
+      # Write a placeholder reference that Claude Code expands at runtime
+      # from its process environment. Do NOT resolve the secret into the
+      # file -- the agent has pull-requests: write and could echo it into
+      # a PR comment if it read the file.
+      - name: Inject Chiplab API key placeholder into MCP config
         run: |
-          jq --arg key "Bearer $CHIPLAB_API_KEY" \
-            '.mcpServers.chiplab.headers = {"Authorization": $key}' \
+          jq '.mcpServers.chiplab.headers = {"Authorization": "Bearer ${CHIPLAB_API_KEY}"}' \
             .mcp.json > .mcp-ci.json
 
       - uses: anthropics/claude-code-action@v1
