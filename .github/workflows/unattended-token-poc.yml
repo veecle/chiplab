@@ -48,7 +48,7 @@ jobs:
           RESPONSE=$(curl -sS --fail \
             -H "Authorization: Bearer ${CHIPLAB_API_KEY}" \
             -H "Content-Type: application/json" \
-            -H "Accept: application/json" \
+            -H "Accept: application/json, text/event-stream" \
             -d '{"jsonrpc":"2.0","method":"initialize","id":1,"params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"github-actions-ci","version":"1.0.0"}}}' \
             "${CHIPLAB_MCP_URL}")
 
@@ -84,7 +84,7 @@ jobs:
           RESPONSE=$(curl -sS --fail \
             -H "Authorization: Bearer ${CHIPLAB_API_KEY}" \
             -H "Content-Type: application/json" \
-            -H "Accept: application/json" \
+            -H "Accept: application/json, text/event-stream" \
             -d '{"jsonrpc":"2.0","method":"tools/call","id":2,"params":{"name":"issue_upload_ticket","arguments":{}}}' \
             "${CHIPLAB_MCP_URL}")
 
@@ -146,7 +146,7 @@ jobs:
           RESPONSE=$(curl -sS --fail \
             -H "Authorization: Bearer ${CHIPLAB_API_KEY}" \
             -H "Content-Type: application/json" \
-            -H "Accept: application/json" \
+            -H "Accept: application/json, text/event-stream" \
             -d "{\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"id\":3,\"params\":{\"name\":\"run\",\"arguments\":{\"artifact_id\":\"${{ steps.upload_ticket.outputs.artifact_id }}\",\"board_id\":\"stm32f4_discovery\"}}}" \
             "${CHIPLAB_MCP_URL}")
 
@@ -191,7 +191,7 @@ jobs:
           RESPONSE=$(curl -sS --fail \
             -H "Authorization: Bearer ${CHIPLAB_API_KEY}" \
             -H "Content-Type: application/json" \
-            -H "Accept: application/json" \
+            -H "Accept: application/json, text/event-stream" \
             -d "{\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"id\":4,\"params\":{\"name\":\"list_run_artifacts\",\"arguments\":{\"run_id\":\"${{ steps.run.outputs.run_id }}\"}}}" \
             "${CHIPLAB_MCP_URL}")
 
@@ -217,7 +217,7 @@ jobs:
           RESPONSE=$(curl -sS --fail \
             -H "Authorization: Bearer ${CHIPLAB_API_KEY}" \
             -H "Content-Type: application/json" \
-            -H "Accept: application/json" \
+            -H "Accept: application/json, text/event-stream" \
             -d "{\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"id\":5,\"params\":{\"name\":\"issue_download_ticket\",\"arguments\":{\"run_id\":\"${{ steps.run.outputs.run_id }}\",\"artifact_name\":\"$UART_ARTIFACT\"}}}" \
             "${CHIPLAB_MCP_URL}")
 

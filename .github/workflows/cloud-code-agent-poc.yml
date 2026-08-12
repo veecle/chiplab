@@ -14,7 +14,7 @@ jobs:
   agent-driven:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@5c1b89bfe41bbe000c041f12298933afd2c80e30 # v5.2.1
+      - uses: actions/checkout@v5
 
       # ------------------------------------------------------------------
       # Step 1: Write MCP config with the API token
@@ -24,7 +24,7 @@ jobs:
       # must match what the veecle-platform auth layer expects for API tokens.
       - name: Configure Chiplab MCP with API token
         run: |
-          cat > .mcp.json << 'MCPEOF'
+          cat > .mcp.json << MCPEOF
           {
             "mcpServers": {
               "chiplab": {
