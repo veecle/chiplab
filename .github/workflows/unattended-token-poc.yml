@@ -1,8 +1,6 @@
 name: Unattended Token POC
 
 on:
-  push:
-    branches: [forria/unattended-token-poc]
   workflow_dispatch:
 
 # Proves that a veecle_pat_* token stored as a GitHub Actions secret can:
@@ -31,6 +29,7 @@ jobs:
         run: cargo build --release
 
       - name: Verify ELF exists
+        id: build
         run: |
           ELF="examples/bare-metal/stm32f4-discovery/target/thumbv7m-none-eabi/release/hello-stm32f4-discovery"
           if [ ! -f "$ELF" ]; then
@@ -99,15 +98,16 @@ jobs:
 
           echo "mcp_session_id=$MCP_SESSION_ID" >> "$GITHUB_OUTPUT"
 
-          # Per MCP spec, send the initialized notification to complete
-          # the handshake before calling any other methods.
+          # Per JSON-RPC 2.0, a notification is a request without an
+          # `id` member. Including one would turn this into a regular
+          # request named "notifications/initialized".
           curl -sS \
             -o /dev/null \
             -H "Authorization: Bearer ${CHIPLAB_API_KEY}" \
             -H "Mcp-Session-Id: ${MCP_SESSION_ID}" \
             -H "Content-Type: application/json" \
             -H "Accept: application/json, text/event-stream" \
-            -d '{"jsonrpc":"2.0","method":"notifications/initialized","id":0}' \
+            -d '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
             "${CHIPLAB_MCP_URL}" || true
 
           echo "::notice::MCP session initialized, session_id=$MCP_SESSION_ID"
@@ -178,6 +178,7 @@ jobs:
       # Step 4: Upload the ELF
       # ------------------------------------------------------------------
       - name: Upload ELF to presigned URL
+        id: upload
         run: |
           echo "Uploading ${{ env.ELF_PATH }} (${{ env.ELF_SIZE }} bytes)"
           HTTP_CODE=$(curl -sS -o /dev/null -w "%{http_code}" \
@@ -248,7 +249,8 @@ jobs:
           echo "Task $TASK_ID started, initial status: $LAST_STATUS"
 
           # Poll get_task_info until the task completes. Each call blocks
-          # until the status changes from last_status, capped at 2 minutes.
+          # until the status changes from last_status, capped at 30 s per
+          # call and 300 s total.
           echo "Waiting for task to complete..."
           ELAPSED=0
           MAX_WAIT=300
@@ -265,6 +267,14 @@ jobs:
 
             BODY=$(sed -n 's/^data: //p' "$BODY_FILE")
 
+            # Fail fast on request-level or JSON-RPC errors so the loop
+            # doesn't spin on a dead session.
+            if [ "$HTTP_CODE" != "200" ] || [ "$(echo "$BODY" | jq -r '.error.code // "none"')" != "none" ]; then
+              echo "::error::get_task_info failed (HTTP $HTTP_CODE)"
+              cat "$BODY_FILE"
+              exit 1
+            fi
+
             TIMED_OUT=$(echo "$BODY" | jq -r '.result.structuredContent.timed_out // false')
             NEW_STATUS=$(echo "$BODY" | jq -r '.result.structuredContent.task.status // empty')
 
@@ -277,7 +287,10 @@ jobs:
               echo "Polling timed out, retrying..."
             fi
 
-            LAST_STATUS="$NEW_STATUS"
+            # Only advance last_status when the server gave us something.
+            if [ -n "$NEW_STATUS" ]; then
+              LAST_STATUS="$NEW_STATUS"
+            fi
             ELAPSED=$((ELAPSED + 30))
             echo "Still waiting... (${ELAPSED}s elapsed, status: $NEW_STATUS)"
           done
@@ -323,7 +336,8 @@ jobs:
       # ------------------------------------------------------------------
       # Step 6: Get download URL for the UART output
       # ------------------------------------------------------------------
-      - name: Download UART output
+      - id: download_uart
+        name: Download UART output
         env:
           MCP_SESSION_ID: ${{ steps.init.outputs.mcp_session_id }}
         run: |
@@ -404,13 +418,20 @@ jobs:
       # ------------------------------------------------------------------
       - name: Report
         if: always()
+        env:
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+          INIT_OUTCOME: ${{ steps.init.outcome }}
+          UPLOAD_OUTCOME: ${{ steps.upload.outcome }}
+          RUN_OUTCOME: ${{ steps.run.outcome }}
+          DOWNLOAD_OUTCOME: ${{ steps.download_uart.outcome }}
         run: |
+          ok() { [ "$1" = "success" ] && echo ":white_check_mark:" || echo ":x:"; }
           echo "### Chiplab Unattended Token POC - ${{ job.status }}" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "| Check | Result |" >> "$GITHUB_STEP_SUMMARY"
           echo "|-------|--------|" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Token auth | :white_check_mark: |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Build ELF | :white_check_mark: |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Upload ELF | :white_check_mark: |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Simulate on stm32f4-discovery | :white_check_mark: |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Verify 'Hello world!' output | :white_check_mark: |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Token auth / MCP init | $(ok "$INIT_OUTCOME") |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Build ELF | $(ok "$BUILD_OUTCOME") |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Upload ELF | $(ok "$UPLOAD_OUTCOME") |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Simulate on stm32f4-discovery | $(ok "$RUN_OUTCOME") |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Verify 'Hello world!' output | $(ok "$DOWNLOAD_OUTCOME") |" >> "$GITHUB_STEP_SUMMARY"

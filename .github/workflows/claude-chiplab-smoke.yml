@@ -1,4 +1,4 @@
-name: claude-chiplab-smoke
+name: Claude Smoke Test POC
 
 on:
   pull_request:
@@ -53,10 +53,9 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          claude_args: |
-            --model fable
-            --mcp-config .mcp-ci.json
-            -p "You are running in GitHub Actions CI as a smoke test for the Chiplab hardware-in-the-loop platform. Post your final result as a PR comment. Execute these steps in order. Stop and report failure immediately if any step fails.
+          show_full_output: true
+          prompt: |
+            You are running in GitHub Actions CI as a smoke test for the Chiplab hardware-in-the-loop platform. Post your final result as a PR comment. Execute these steps in order. Stop and report failure immediately if any step fails.
 
             STEP 1 - Build the firmware:
             cd examples/bare-metal/stm32f4-discovery && cargo build --release
@@ -71,4 +70,8 @@ jobs:
             STEP 4 - Verify UART output:
             Call list_run_artifacts with the run_id. Find the 'stdout' artifact. Call issue_download_ticket to get a presigned download URL. Download the output and verify it contains the string 'Hello world!'.
 
-            When all steps pass, output a summary table with a checkmark for Build, Upload, Simulate, and Verify."
+            When all steps pass, output a summary table with a checkmark for Build, Upload, Simulate, and Verify.
+          claude_args: |
+            --model fable
+            --mcp-config .mcp-ci.json
+            --allowedTools "Bash(cargo:*),Read,mcp__chiplab__*"
