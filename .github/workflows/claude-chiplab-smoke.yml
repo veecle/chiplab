@@ -1,7 +1,10 @@
 name: claude-chiplab-smoke
 
 on:
-  workflow_dispatch:
+  pull_request:
+    types: [opened, ready_for_review, reopened]
+  issue_comment:
+    types: [created]
 
 # Claude Code drives the same build -> upload -> simulate -> verify UART loop
 # that the unattended-token-poc workflow does, but the agent handles MCP
@@ -10,10 +13,25 @@ on:
 jobs:
   smoke:
     runs-on: ubuntu-latest
+
+    if: |
+      (
+        github.event_name == 'pull_request'
+        && !github.event.pull_request.draft
+        && github.event.pull_request.head.repo.full_name == github.repository
+        && github.actor != 'dependabot[bot]'
+      )
+      || (
+        github.event_name == 'issue_comment'
+        && github.event.issue.pull_request
+        && contains(github.event.comment.body, '/chiplab-smoke')
+        && github.event.comment.user.type != 'Bot'
+      )
     env:
       CHIPLAB_API_KEY: ${{ secrets.CHIPLAB_API_KEY }}
     permissions:
       contents: read
+      pull-requests: write
       id-token: write
       actions: read
     steps:
@@ -38,7 +56,7 @@ jobs:
           claude_args: |
             --model fable
             --mcp-config .mcp-ci.json
-            -p "You are running in GitHub Actions CI as a smoke test for the Chiplab hardware-in-the-loop platform. Execute these steps in order. Stop and report failure immediately if any step fails.
+            -p "You are running in GitHub Actions CI as a smoke test for the Chiplab hardware-in-the-loop platform. Post your final result as a PR comment. Execute these steps in order. Stop and report failure immediately if any step fails.
 
             STEP 1 - Build the firmware:
             cd examples/bare-metal/stm32f4-discovery && cargo build --release
