@@ -1,0 +1,58 @@
+name: claude-chiplab-smoke
+
+on:
+  push:
+    branches: [forria/unattended-token-poc]
+  workflow_dispatch:
+
+# Claude Code drives the same build -> upload -> simulate -> verify UART loop
+# that the unattended-token-poc workflow does, but the agent handles MCP
+# session management, polling, and error handling instead of hand-written curl.
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    env:
+      CHIPLAB_API_KEY: ${{ secrets.CHIPLAB_API_KEY }}
+    permissions:
+      contents: read
+      id-token: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: thumbv7m-none-eabi
+
+      # Inject the API key into .mcp.json so Claude can authenticate to the
+      # Chiplab MCP server. The raw .mcp.json in the repo has no auth headers
+      # because local dev uses browser-based OAuth.
+      - name: Inject Chiplab API key into MCP config
+        run: |
+          jq --arg key "Bearer $CHIPLAB_API_KEY" \
+            '.mcpServers.chiplab.headers = {"Authorization": $key}' \
+            .mcp.json > .mcp-ci.json
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_args: |
+            --model fable
+            --mcp-config .mcp-ci.json
+            -p "You are running in GitHub Actions CI as a smoke test for the Chiplab hardware-in-the-loop platform. Execute these steps in order. Stop and report failure immediately if any step fails.
+
+            STEP 1 - Build the firmware:
+            cd examples/bare-metal/stm32f4-discovery && cargo build --release
+            Confirm the ELF exists at target/thumbv7m-none-eabi/release/hello-stm32f4-discovery.
+
+            STEP 2 - Upload the ELF to Chiplab:
+            Use the chiplab MCP server. Call issue_upload_ticket to get a presigned upload URL, then upload the ELF binary to that URL. Record the artifact_id.
+
+            STEP 3 - Run the simulation:
+            Call the run tool with artifact_id and board_id='stm32f4_discovery'. If the tool returns a task_id, poll get_task_info until status is 'completed', then call get_task_result. Record the run_id.
+
+            STEP 4 - Verify UART output:
+            Call list_run_artifacts with the run_id. Find the 'stdout' artifact. Call issue_download_ticket to get a presigned download URL. Download the output and verify it contains the string 'Hello world!'.
+
+            When all steps pass, output a summary table with a checkmark for Build, Upload, Simulate, and Verify."
