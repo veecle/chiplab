@@ -1,8 +1,6 @@
 name: claude-chiplab-smoke
 
 on:
-  push:
-    branches: [forria/unattended-token-poc]
   workflow_dispatch:
 
 # Claude Code drives the same build -> upload -> simulate -> verify UART loop
