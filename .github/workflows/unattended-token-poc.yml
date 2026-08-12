@@ -13,6 +13,9 @@ on:
 jobs:
   build-and-run:
     runs-on: ubuntu-latest
+    env:
+      CHIPLAB_MCP_URL: https://chiplab.veecle.ai/mcp
+      CHIPLAB_API_KEY: ${{ secrets.CHIPLAB_API_KEY }}
     steps:
       - uses: actions/checkout@v5
 
@@ -45,9 +48,6 @@ jobs:
       # it back. We capture it from the response headers and store it as a
       # step output.
       - name: Initialize MCP connection
-        env:
-          CHIPLAB_MCP_URL: https://chiplab.veecle.ai/mcp
-          CHIPLAB_API_KEY: ${{ secrets.CHIPLAB_API_KEY }}
         id: init
         run: |
           set -e
@@ -98,6 +98,18 @@ jobs:
           fi
 
           echo "mcp_session_id=$MCP_SESSION_ID" >> "$GITHUB_OUTPUT"
+
+          # Per MCP spec, send the initialized notification to complete
+          # the handshake before calling any other methods.
+          curl -sS \
+            -o /dev/null \
+            -H "Authorization: Bearer ${CHIPLAB_API_KEY}" \
+            -H "Mcp-Session-Id: ${MCP_SESSION_ID}" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/json, text/event-stream" \
+            -d '{"jsonrpc":"2.0","method":"notifications/initialized","id":0}' \
+            "${CHIPLAB_MCP_URL}" || true
+
           echo "::notice::MCP session initialized, session_id=$MCP_SESSION_ID"
 
       # ------------------------------------------------------------------
@@ -105,8 +117,6 @@ jobs:
       # ------------------------------------------------------------------
       - name: Issue upload ticket
         env:
-          CHIPLAB_MCP_URL: https://chiplab.veecle.ai/mcp
-          CHIPLAB_API_KEY: ${{ secrets.CHIPLAB_API_KEY }}
           MCP_SESSION_ID: ${{ steps.init.outputs.mcp_session_id }}
         id: upload_ticket
         run: |
@@ -174,10 +184,10 @@ jobs:
             --upload-file "${{ env.ELF_PATH }}" \
             "${{ steps.upload_ticket.outputs.upload_url }}")
 
-          if [ "$HTTP_CODE" != "200" ]; then
-            echo "::error::Upload failed with HTTP $HTTP_CODE"
-            exit 1
-          fi
+          case "$HTTP_CODE" in
+            2??) ;;
+            *) echo "::error::Upload failed with HTTP $HTTP_CODE"; exit 1 ;;
+          esac
 
           echo "::notice::ELF uploaded successfully"
 
@@ -190,8 +200,6 @@ jobs:
       # completes, then fetch the result with get_task_result.
       - name: Run on stm32f4_discovery
         env:
-          CHIPLAB_MCP_URL: https://chiplab.veecle.ai/mcp
-          CHIPLAB_API_KEY: ${{ secrets.CHIPLAB_API_KEY }}
           MCP_SESSION_ID: ${{ steps.init.outputs.mcp_session_id }}
         id: run
         run: |
@@ -308,7 +316,7 @@ jobs:
 
           echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
 
-          ARTIFACTS=$(echo "$TOOL_CONTENT" | jq -r '.artifacts[] // empty')
+          ARTIFACTS=$(echo "$TOOL_CONTENT" | jq -r '.artifacts[]? // empty')
           echo "Run $RUN_ID produced artifacts: $ARTIFACTS"
           echo "::notice::Simulation completed, run_id=$RUN_ID"
 
@@ -317,8 +325,6 @@ jobs:
       # ------------------------------------------------------------------
       - name: Download UART output
         env:
-          CHIPLAB_MCP_URL: https://chiplab.veecle.ai/mcp
-          CHIPLAB_API_KEY: ${{ secrets.CHIPLAB_API_KEY }}
           MCP_SESSION_ID: ${{ steps.init.outputs.mcp_session_id }}
         run: |
           set -e
@@ -345,11 +351,13 @@ jobs:
             exit 1
           fi
 
-          # The response is a JSON object with an "artifacts" array.
-          # Pick the first one (typically "stdout").
-          UART_ARTIFACT=$(echo "$TOOL_CONTENT" | jq -r '.artifacts[0] // empty')
+          # Select the stdout artifact by name. The run output is always
+          # called "stdout"; error out with the full artifact list if it
+          # is missing, rather than silently downloading the wrong file.
+          UART_ARTIFACT=$(echo "$TOOL_CONTENT" | jq -r '.artifacts[]? | select(. == "stdout")')
           if [ -z "$UART_ARTIFACT" ]; then
-            echo "::error::No artifacts found for run"
+            AVAILABLE=$(echo "$TOOL_CONTENT" | jq -r '.artifacts[]? // empty')
+            echo "::error::No 'stdout' artifact found. Available artifacts: $AVAILABLE"
             exit 1
           fi
 
