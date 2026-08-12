@@ -1,6 +1,8 @@
 name: Cloud Code Agent POC
 
 on:
+  push:
+    branches: [forria/unattended-token-poc]
   workflow_dispatch:
 
 # Proves that a `veecle_pat_*` token can drive Chiplab through an AI agent

@@ -1,6 +1,8 @@
 name: Unattended Token POC
 
 on:
+  push:
+    branches: [forria/unattended-token-poc]
   workflow_dispatch:
 
 # Proves that a veecle_pat_* token stored as a GitHub Actions secret can:
