@@ -182,8 +182,12 @@ jobs:
           echo "::notice::ELF uploaded successfully"
 
       # ------------------------------------------------------------------
-      # Step 5: Run the simulation
+      # Step 5: Run the simulation (async task, poll for completion)
       # ------------------------------------------------------------------
+      # The `run` tool is async (TaskSupport::Optional). Since our client
+      # doesn't declare task support, the server enqueues the work and
+      # returns a task_id + status. We poll get_task_info until the task
+      # completes, then fetch the result with get_task_result.
       - name: Run on stm32f4_discovery
         env:
           CHIPLAB_MCP_URL: https://chiplab.veecle.ai/mcp
@@ -224,15 +228,81 @@ jobs:
             exit 1
           fi
 
+          # The `run` tool returns a task when the client doesn't support
+          # async tasks natively. Extract task_id and current status.
+          TASK_ID=$(echo "$BODY" | jq -r '.result.structuredContent.task_id // empty')
+          if [ -z "$TASK_ID" ]; then
+            echo "::error::No task_id in run response"
+            exit 1
+          fi
+
+          LAST_STATUS=$(echo "$BODY" | jq -r '.result.structuredContent.status // "working"')
+          echo "Task $TASK_ID started, initial status: $LAST_STATUS"
+
+          # Poll get_task_info until the task completes. Each call blocks
+          # until the status changes from last_status, capped at 2 minutes.
+          echo "Waiting for task to complete..."
+          ELAPSED=0
+          MAX_WAIT=300
+          while [ "$ELAPSED" -lt "$MAX_WAIT" ]; do
+            HTTP_CODE=$(curl -sS \
+              -o "$BODY_FILE" \
+              -w "%{http_code}" \
+              -H "Authorization: Bearer ${CHIPLAB_API_KEY}" \
+              -H "Mcp-Session-Id: ${MCP_SESSION_ID}" \
+              -H "Content-Type: application/json" \
+              -H "Accept: application/json, text/event-stream" \
+              -d "{\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"id\":50,\"params\":{\"name\":\"get_task_info\",\"arguments\":{\"task_id\":\"$TASK_ID\",\"last_status\":\"$LAST_STATUS\",\"timeout\":30}}}" \
+              "${CHIPLAB_MCP_URL}")
+
+            BODY=$(sed -n 's/^data: //p' "$BODY_FILE")
+
+            TIMED_OUT=$(echo "$BODY" | jq -r '.result.structuredContent.timed_out // false')
+            NEW_STATUS=$(echo "$BODY" | jq -r '.result.structuredContent.task.status // empty')
+
+            if [ "$NEW_STATUS" = "completed" ] || [ "$NEW_STATUS" = "failed" ] || [ "$NEW_STATUS" = "cancelled" ]; then
+              echo "Task completed with status: $NEW_STATUS"
+              break
+            fi
+
+            if [ "$TIMED_OUT" = "true" ]; then
+              echo "Polling timed out, retrying..."
+            fi
+
+            LAST_STATUS="$NEW_STATUS"
+            ELAPSED=$((ELAPSED + 30))
+            echo "Still waiting... (${ELAPSED}s elapsed, status: $NEW_STATUS)"
+          done
+
+          if [ "$NEW_STATUS" != "completed" ]; then
+            echo "::error::Task did not complete within ${MAX_WAIT}s (final status: $NEW_STATUS)"
+            exit 1
+          fi
+
+          # Fetch the final result.
+          HTTP_CODE=$(curl -sS \
+            -o "$BODY_FILE" \
+            -w "%{http_code}" \
+            -H "Authorization: Bearer ${CHIPLAB_API_KEY}" \
+            -H "Mcp-Session-Id: ${MCP_SESSION_ID}" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/json, text/event-stream" \
+            -d "{\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"id\":51,\"params\":{\"name\":\"get_task_result\",\"arguments\":{\"task_id\":\"$TASK_ID\"}}}" \
+            "${CHIPLAB_MCP_URL}")
+
+          BODY=$(sed -n 's/^data: //p' "$BODY_FILE")
+          echo "Task result:"
+          echo "$BODY" | jq .
+
           TOOL_CONTENT=$(echo "$BODY" | jq -r '.result.content[0].text // empty')
           if [ -z "$TOOL_CONTENT" ]; then
-            echo "::error::No content in run response"
+            echo "::error::No content in task result"
             exit 1
           fi
 
           RUN_ID=$(echo "$TOOL_CONTENT" | jq -r '.run_id // empty')
           if [ -z "$RUN_ID" ]; then
-            echo "::error::Missing run_id in run response"
+            echo "::error::Missing run_id in task result"
             exit 1
           fi
 
