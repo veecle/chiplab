@@ -345,9 +345,9 @@ jobs:
             exit 1
           fi
 
-          # The response is a JSON array of artifact names. Pick the first one
-          # (typically uart output).
-          UART_ARTIFACT=$(echo "$TOOL_CONTENT" | jq -r '.[0] // empty')
+          # The response is a JSON object with an "artifacts" array.
+          # Pick the first one (typically "stdout").
+          UART_ARTIFACT=$(echo "$TOOL_CONTENT" | jq -r '.artifacts[0] // empty')
           if [ -z "$UART_ARTIFACT" ]; then
             echo "::error::No artifacts found for run"
             exit 1
