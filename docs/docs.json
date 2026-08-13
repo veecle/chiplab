@@ -18,5 +18,21 @@
       { "group": "Hardware", "pages": ["hardware/boards"] },
       { "group": "Platform", "pages": ["platform/api-keys", "platform/usage"] }
     ]
+  },
+  "seo": {
+    "indexing": "all"
+  },
+  "description": "Chiplab is an MCP server that lets AI coding agents build, run, and test embedded firmware on a virtual copy of the real chip — no physical hardware required. It supports STM32 and Nordic nRF52 chips across bare-metal, Zephyr RTOS, FreeRTOS, Eclipse ThreadX, and Embassy-Rust, compiling against production toolchains and simulating peripherals and interrupt timing with the same accuracy as real silicon. Any MCP-compatible AI coding tool — including Claude Code, Cursor, and VS Code — can connect directly, with no local toolchain installation required.",
+  "footer": {
+    "socials": {
+      "github": "https://github.com/veecle/chiplab"
+    }
+  },
+  "logo": {
+    "light": "/docs/images/LogoMark(White).png",
+    "dark": "/docs/images/LogoMark(Black).png"
+  },
+  "icons": {
+    "library": "fontawesome"
   }
 }
