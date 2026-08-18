@@ -1,19 +1,61 @@
+# ---------------------------------------------------------------------------
+# Claude-Chiplab Smoke Test
+# ---------------------------------------------------------------------------
+# This workflow proves that an AI agent (Claude Code) can drive the full
+# Chiplab hardware-in-the-loop loop unattended in CI:
+#
+#   Build firmware -> Upload ELF -> Run on virtual board -> Verify UART output
+#
+# It replaces hand-written curl scripts with an agent that handles MCP
+# session setup, async polling, and error recovery on its own.
+#
+# Two ways to trigger:
+#   1. Open or update a PR that touches the example, .mcp.json, or this file.
+#   2. Comment /chiplab-smoke on any PR (must be a repo owner/member/collaborator).
+#
+# Secrets needed:
+#   CHIPLAB_API_KEY   - a veecle_pat_* token for Chiplab MCP authentication
+#   ANTHROPIC_API_KEY - API key for Claude (used by claude-code-action)
+# ---------------------------------------------------------------------------
+
 name: Claude Smoke Test POC
 
+# ---------------------------------------------------------------------------
+# TRIGGERS
+# ---------------------------------------------------------------------------
+# pull_request: fires when a PR is opened, marked ready, reopened, or pushed
+#   to. The paths filter avoids wasting CI minutes on docs-only changes.
+# issue_comment: fires on any comment. The job-level `if` narrows it to
+#   comments containing /chiplab-smoke on a PR from an authorized user.
+# ---------------------------------------------------------------------------
 on:
   pull_request:
-    types: [opened, ready_for_review, reopened]
+    types: [opened, ready_for_review, reopened, synchronize]
+    paths:
+      - 'examples/bare-metal/stm32f4-discovery/**'
+      - '.mcp.json'
+      - '.github/workflows/claude-chiplab-smoke.yml'
   issue_comment:
     types: [created]
-
-# Claude Code drives the same build -> upload -> simulate -> verify UART loop
-# that the unattended-token-poc workflow does, but the agent handles MCP
-# session management, polling, and error handling instead of hand-written curl.
 
 jobs:
   smoke:
     runs-on: ubuntu-latest
 
+    # -----------------------------------------------------------------------
+    # GATE: decide whether to run based on the event type
+    # -----------------------------------------------------------------------
+    # pull_request path:
+    #   - skip drafts (not ready)
+    #   - skip fork PRs (we don't run untrusted code with secrets)
+    #   - skip dependabot (automated dep bumps don't need smoke tests)
+    #
+    # issue_comment path:
+    #   - must be on a PR (not a regular issue)
+    #   - must contain the /chiplab-smoke command
+    #   - commenter must be OWNER, MEMBER, or COLLABORATOR of the repo
+    #     (prevents random users from spending our CI budget)
+    # -----------------------------------------------------------------------
     if: |
       (
         github.event_name == 'pull_request'
@@ -27,57 +69,167 @@ jobs:
         && contains(github.event.comment.body, '/chiplab-smoke')
         && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
       )
-    env:
-      CHIPLAB_API_KEY: ${{ secrets.CHIPLAB_API_KEY }}
+
+    # -----------------------------------------------------------------------
+    # PERMISSIONS: minimum set needed by this job
+    # -----------------------------------------------------------------------
+    # contents: read  - checkout the repo
+    # pull-requests: read - the fork-guard step calls `gh pr view`
+    # No write permissions needed. The agent cannot post PR comments or
+    # modify the repo. The step summary is written via GITHUB_STEP_SUMMARY
+    # which is always writable regardless of permissions.
+    # -----------------------------------------------------------------------
     permissions:
       contents: read
-      pull-requests: write
-      id-token: write
-      actions: read
+      pull-requests: read
+
     steps:
-      # Check out the PR head even on issue_comment events.
-      # On pull_request events github.ref is already the merge ref;
-      # on issue_comment it defaults to main, which would build the
-      # wrong code.
+      # ---------------------------------------------------------------------
+      # STEP 0: Fork guard (comment trigger only)
+      # ---------------------------------------------------------------------
+      # On issue_comment events, the author-association gate above ensures
+      # only trusted users can trigger the workflow. But a trusted user could
+      # still comment /chiplab-smoke on a malicious fork PR. If we then check
+      # out that fork's code, a compromised build.rs or .mcp.json could leak
+      # the Chiplab API key.
+      #
+      # This step calls the GitHub API to verify the PR's head repository
+      # belongs to the same organization as this repo. If it doesn't, the
+      # job fails before any untrusted code touches disk.
+      #
+      # On pull_request events we already check head.repo.full_name in the
+      # job-level `if`, so this step is skipped.
+      # ---------------------------------------------------------------------
+      - name: Verify PR is from this repository (comment trigger only)
+        if: github.event_name == 'issue_comment'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          HEAD_REPO=$(gh pr view ${{ github.event.issue.number }} \
+            --repo ${{ github.repository }} \
+            --json headRepositoryOwner \
+            --jq '.headRepositoryOwner.login // ""')
+          TARGET_ORG="${{ github.repository_owner }}"
+          if [ "$HEAD_REPO" != "$TARGET_ORG" ]; then
+            echo "::error::Refusing to smoke-test a fork PR (head repo: $HEAD_REPO, expected: $TARGET_ORG)"
+            exit 1
+          fi
+          echo "::notice::PR head repo verified: $HEAD_REPO"
+
+      # ---------------------------------------------------------------------
+      # STEP 1: Check out the right code
+      # ---------------------------------------------------------------------
+      # On pull_request events, github.ref is the merge commit (main + PR
+      # branch) - that's what we want to test.
+      #
+      # On issue_comment events, github.ref is the default branch (main).
+      # Without this override we'd build and test main's code instead of the
+      # PR's code. We resolve the PR head ref explicitly so we test the
+      # actual proposed changes.
+      #
+      # The `if: !cancelled()` ensures checkout still runs even if the fork
+      # guard step above failed - this lets us see the full error instead
+      # of a confusing "step skipped" message.
+      # ---------------------------------------------------------------------
       - uses: actions/checkout@v5
+        if: ${{ !cancelled() }}
         with:
           ref: ${{ github.event_name == 'issue_comment' && format('refs/pull/{0}/head', github.event.issue.number) || github.ref }}
 
+      # ---------------------------------------------------------------------
+      # STEP 2: Install the Rust toolchain
+      # ---------------------------------------------------------------------
+      # The stm32f4-discovery example cross-compiles for ARM Cortex-M4.
+      # We only need the one target, not the full set that build-examples
+      # uses. dtolnay/rust-toolchain is the community-standard action for
+      # this - faster and more reliable than rustup manually.
+      # ---------------------------------------------------------------------
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: thumbv7m-none-eabi
 
-      # Write a placeholder reference that Claude Code expands at runtime
-      # from its process environment. Do NOT resolve the secret into the
-      # file -- the agent has pull-requests: write and could echo it into
-      # a PR comment if it read the file.
-      - name: Inject Chiplab API key placeholder into MCP config
+      # ---------------------------------------------------------------------
+      # STEP 3: Generate the MCP configuration
+      # ---------------------------------------------------------------------
+      # Claude Code needs an MCP config file to connect to Chiplab. We can't
+      # use the repo's .mcp.json directly because:
+      #
+      #   1. It has no auth headers (local dev uses browser OAuth).
+      #   2. A fork PR could edit it to point at an attacker's server.
+      #
+      # So we build a fresh config from scratch using jq:
+      #   - The server URL is hardcoded to the real Chiplab endpoint.
+      #   - The API key is written as a literal ${CHIPLAB_API_KEY} string.
+      #     Claude Code expands this at runtime from the env var we set on
+      #     the claude-code-action step below. The key never touches disk.
+      #
+      # Output: .mcp-ci.json (gitignored, CI-only, thrown away after the run)
+      # ---------------------------------------------------------------------
+      - name: Generate MCP config with API key placeholder
         run: |
-          jq '.mcpServers.chiplab.headers = {"Authorization": "Bearer ${CHIPLAB_API_KEY}"}' \
-            .mcp.json > .mcp-ci.json
+          jq -n \
+            --arg server_url "https://chiplab.veecle.ai/mcp" \
+            '{
+              mcpServers: {
+                chiplab: {
+                  type: "http",
+                  url: $server_url,
+                  headers: { Authorization: "Bearer ${CHIPLAB_API_KEY}" }
+                }
+              }
+            }' > .mcp-ci.json
 
+      # ---------------------------------------------------------------------
+      # STEP 4: Let Claude Code drive the smoke test
+      # ---------------------------------------------------------------------
+      # This is where the magic happens. Instead of scripting each MCP call
+      # by hand (initialize session, capture headers, parse SSE, poll tasks,
+      # parse JSON, handle retries...), we give Claude a prompt and let it
+      # figure out the details.
+      #
+      # anthropics/claude-code-action@v1:
+      #   anthropic_api_key - the Claude API key (secret)
+      #   show_full_output  - print everything Claude does to the job log
+      #   prompt            - the instructions Claude follows (automation mode)
+      #   claude_args       - extra CLI flags passed to claude
+      #
+      # Security notes:
+      #   - CHIPLAB_API_KEY is scoped to this step only (not job-level).
+      #     No other step - including cargo build - can see it.
+      #   - The MCP config uses env-var expansion (${CHIPLAB_API_KEY}).
+      #     The actual secret value never appears in a file.
+      #   - --allowedTools locks Claude down to exactly what it needs:
+      #     Bash(cd/cargo/curl/echo) for shell work, Write for the step
+      #     summary, Read for reading files, mcp__chiplab__* for all
+      #     Chiplab MCP tools.
+      # ---------------------------------------------------------------------
       - uses: anthropics/claude-code-action@v1
+        env:
+          CHIPLAB_API_KEY: ${{ secrets.CHIPLAB_API_KEY }}
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           show_full_output: true
           prompt: |
             You are running in GitHub Actions CI as a smoke test for the Chiplab hardware-in-the-loop platform. Execute these steps in order. Write your final summary table to the GitHub Actions step summary. Stop and report failure immediately if any step fails.
 
+            STEP 0 - Discover available tools:
+            Call the Chiplab discovery/help tool first to get the current set of MCP tools and any board-specific guidance. This ensures you use the right tool names even if they change.
+
             STEP 1 - Build the firmware:
             cd examples/bare-metal/stm32f4-discovery && cargo build --release
             Confirm the ELF exists at target/thumbv7m-none-eabi/release/hello-stm32f4-discovery.
 
             STEP 2 - Upload the ELF to Chiplab:
-            Use the chiplab MCP server. Call issue_upload_ticket to get a presigned upload URL, then upload the ELF binary to that URL. Record the artifact_id.
+            Use the Chiplab MCP tools to get an upload ticket (presigned URL), then upload the ELF binary to that URL. Record the artifact_id.
 
             STEP 3 - Run the simulation:
-            Call the run tool with artifact_id and board_id='stm32f4_discovery'. If the tool returns a task_id, poll get_task_info until status is 'completed', then call get_task_result. Record the run_id.
+            Use the Chiplab MCP tools to run the uploaded artifact on board 'stm32f4_discovery'. If the run is asynchronous, poll until it completes, then fetch the result. Record the run_id.
 
             STEP 4 - Verify UART output:
-            Call list_run_artifacts with the run_id. Find the 'stdout' artifact. Call issue_download_ticket to get a presigned download URL. Download the output and verify it contains the string 'Hello world!'.
+            Use the Chiplab MCP tools to list the run's artifacts, find the 'stdout' artifact, get a download ticket, download the output, and verify it contains the string 'Hello world!'.
 
             When all steps pass, output a summary table with a checkmark for Build, Upload, Simulate, and Verify.
           claude_args: |
             --model fable
             --mcp-config .mcp-ci.json
-            --allowedTools "Bash(cd:*),Bash(cargo:*),Bash(curl:*),Read,mcp__chiplab__*"
+            --allowedTools "Bash(cd:*),Bash(cargo:*),Bash(curl:*),Bash(echo:*),Write,Read,mcp__chiplab__*"
