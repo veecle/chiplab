@@ -73,15 +73,21 @@ jobs:
     # -----------------------------------------------------------------------
     # PERMISSIONS: minimum set needed by this job
     # -----------------------------------------------------------------------
-    # contents: read  - checkout the repo
+    # contents: read   - checkout the repo
     # pull-requests: read - the fork-guard step calls `gh pr view`
-    # No write permissions needed. The agent cannot post PR comments or
+    # id-token: write  - claude-code-action uses OIDC to get a GitHub token
+    #                    for its own API calls (not for Anthropic auth).
+    #                    The error message if this is missing is clear:
+    #                    "Could not fetch an OIDC token. Did you remember
+    #                    to add id-token: write to your workflow permissions?"
+    # No pull-requests write needed. The agent cannot post PR comments or
     # modify the repo. The step summary is written via GITHUB_STEP_SUMMARY
     # which is always writable regardless of permissions.
     # -----------------------------------------------------------------------
     permissions:
       contents: read
       pull-requests: read
+      id-token: write
 
     steps:
       # ---------------------------------------------------------------------
