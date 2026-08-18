@@ -1,0 +1,83 @@
+name: Claude Smoke Test POC
+
+on:
+  pull_request:
+    types: [opened, ready_for_review, reopened]
+  issue_comment:
+    types: [created]
+
+# Claude Code drives the same build -> upload -> simulate -> verify UART loop
+# that the unattended-token-poc workflow does, but the agent handles MCP
+# session management, polling, and error handling instead of hand-written curl.
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+
+    if: |
+      (
+        github.event_name == 'pull_request'
+        && !github.event.pull_request.draft
+        && github.event.pull_request.head.repo.full_name == github.repository
+        && github.actor != 'dependabot[bot]'
+      )
+      || (
+        github.event_name == 'issue_comment'
+        && github.event.issue.pull_request
+        && contains(github.event.comment.body, '/chiplab-smoke')
+        && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
+      )
+    env:
+      CHIPLAB_API_KEY: ${{ secrets.CHIPLAB_API_KEY }}
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+      actions: read
+    steps:
+      # Check out the PR head even on issue_comment events.
+      # On pull_request events github.ref is already the merge ref;
+      # on issue_comment it defaults to main, which would build the
+      # wrong code.
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event_name == 'issue_comment' && format('refs/pull/{0}/head', github.event.issue.number) || github.ref }}
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: thumbv7m-none-eabi
+
+      # Write a placeholder reference that Claude Code expands at runtime
+      # from its process environment. Do NOT resolve the secret into the
+      # file -- the agent has pull-requests: write and could echo it into
+      # a PR comment if it read the file.
+      - name: Inject Chiplab API key placeholder into MCP config
+        run: |
+          jq '.mcpServers.chiplab.headers = {"Authorization": "Bearer ${CHIPLAB_API_KEY}"}' \
+            .mcp.json > .mcp-ci.json
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          show_full_output: true
+          prompt: |
+            You are running in GitHub Actions CI as a smoke test for the Chiplab hardware-in-the-loop platform. Execute these steps in order. Write your final summary table to the GitHub Actions step summary. Stop and report failure immediately if any step fails.
+
+            STEP 1 - Build the firmware:
+            cd examples/bare-metal/stm32f4-discovery && cargo build --release
+            Confirm the ELF exists at target/thumbv7m-none-eabi/release/hello-stm32f4-discovery.
+
+            STEP 2 - Upload the ELF to Chiplab:
+            Use the chiplab MCP server. Call issue_upload_ticket to get a presigned upload URL, then upload the ELF binary to that URL. Record the artifact_id.
+
+            STEP 3 - Run the simulation:
+            Call the run tool with artifact_id and board_id='stm32f4_discovery'. If the tool returns a task_id, poll get_task_info until status is 'completed', then call get_task_result. Record the run_id.
+
+            STEP 4 - Verify UART output:
+            Call list_run_artifacts with the run_id. Find the 'stdout' artifact. Call issue_download_ticket to get a presigned download URL. Download the output and verify it contains the string 'Hello world!'.
+
+            When all steps pass, output a summary table with a checkmark for Build, Upload, Simulate, and Verify.
+          claude_args: |
+            --model fable
+            --mcp-config .mcp-ci.json
+            --allowedTools "Bash(cd:*),Bash(cargo:*),Bash(curl:*),Read,mcp__chiplab__*"
