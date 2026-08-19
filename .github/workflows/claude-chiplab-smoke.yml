@@ -1,40 +1,24 @@
 # ---------------------------------------------------------------------------
-# Claude-Chiplab Smoke Test
+# Chiplab CI example
 # ---------------------------------------------------------------------------
-# This workflow proves that an AI agent (Claude Code) can drive the full
-# Chiplab hardware-in-the-loop loop unattended in CI:
+# Reference workflow: an AI agent (Claude Code) drives Chiplab end to end in
+# CI - build firmware, upload it, run it on a virtual board, verify the UART
+# output. The prompt is intentionally generic; the agent follows AGENTS.md and
+# the Chiplab docs to discover the tool calls, so this doubles as a template
+# for integrating Chiplab into your own CI.
 #
-#   Build firmware -> Upload ELF -> Run on virtual board -> Verify UART output
+# Trigger: comment /smoke-test on any PR (repo owner/member/collaborator only).
 #
-# It replaces hand-written curl scripts with an agent that handles MCP
-# session setup, async polling, and error recovery on its own.
-#
-# Two ways to trigger:
-#   1. Open or update a PR that touches the example, .mcp.json, or this file.
-#   2. Comment /chiplab-smoke on any PR (must be a repo owner/member/collaborator).
-#
-# Secrets needed:
-#   CHIPLAB_API_KEY   - a veecle_pat_* token for Chiplab MCP authentication
-#   ANTHROPIC_API_KEY - API key for Claude (used by claude-code-action)
+# Secrets required:
+#   CHIPLAB_API_KEY   - API token for Chiplab MCP authentication (veecle_pat_*)
+#   ANTHROPIC_API_KEY - Anthropic API key used by claude-code-action
 # ---------------------------------------------------------------------------
 
-name: Claude Smoke Test POC
+name: Chiplab CI
 
-# ---------------------------------------------------------------------------
-# TRIGGERS
-# ---------------------------------------------------------------------------
-# pull_request: fires when a PR is opened, marked ready, reopened, or pushed
-#   to. The paths filter avoids wasting CI minutes on docs-only changes.
 # issue_comment: fires on any comment. The job-level `if` narrows it to
-#   comments containing /chiplab-smoke on a PR from an authorized user.
-# ---------------------------------------------------------------------------
+#   comments containing /smoke-test on a PR from an authorized user.
 on:
-  pull_request:
-    types: [opened, ready_for_review, reopened, synchronize]
-    paths:
-      - 'examples/bare-metal/stm32f4-discovery/**'
-      - '.mcp.json'
-      - '.github/workflows/claude-chiplab-smoke.yml'
   issue_comment:
     types: [created]
 
@@ -43,32 +27,17 @@ jobs:
     runs-on: ubuntu-latest
 
     # -----------------------------------------------------------------------
-    # GATE: decide whether to run based on the event type
+    # GATE: only run on an authorized /smoke-test comment on a PR
     # -----------------------------------------------------------------------
-    # pull_request path:
-    #   - skip drafts (not ready)
-    #   - skip fork PRs (we don't run untrusted code with secrets)
-    #   - skip dependabot (automated dep bumps don't need smoke tests)
-    #
-    # issue_comment path:
     #   - must be on a PR (not a regular issue)
-    #   - must contain the /chiplab-smoke command
+    #   - must contain the /smoke-test command
     #   - commenter must be OWNER, MEMBER, or COLLABORATOR of the repo
     #     (prevents random users from spending our CI budget)
     # -----------------------------------------------------------------------
     if: |
-      (
-        github.event_name == 'pull_request'
-        && !github.event.pull_request.draft
-        && github.event.pull_request.head.repo.full_name == github.repository
-        && github.actor != 'dependabot[bot]'
-      )
-      || (
-        github.event_name == 'issue_comment'
-        && github.event.issue.pull_request
-        && contains(github.event.comment.body, '/chiplab-smoke')
-        && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
-      )
+      github.event.issue.pull_request
+      && contains(github.event.comment.body, '/smoke-test')
+      && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
 
     # -----------------------------------------------------------------------
     # PERMISSIONS: minimum set needed by this job
@@ -91,23 +60,19 @@ jobs:
 
     steps:
       # ---------------------------------------------------------------------
-      # STEP 0: Fork guard (comment trigger only)
+      # STEP 0: Fork guard
       # ---------------------------------------------------------------------
-      # On issue_comment events, the author-association gate above ensures
-      # only trusted users can trigger the workflow. But a trusted user could
-      # still comment /chiplab-smoke on a malicious fork PR. If we then check
-      # out that fork's code, a compromised build.rs or .mcp.json could leak
-      # the Chiplab API key.
+      # The author-association gate above ensures only trusted users can
+      # trigger the workflow. But a trusted user could still comment
+      # /smoke-test on a malicious fork PR. If we then check out that fork's
+      # code, a compromised build.rs or .mcp.json could leak the Chiplab API
+      # key.
       #
       # This step calls the GitHub API to verify the PR's head repository
       # belongs to the same organization as this repo. If it doesn't, the
       # job fails before any untrusted code touches disk.
-      #
-      # On pull_request events we already check head.repo.full_name in the
-      # job-level `if`, so this step is skipped.
       # ---------------------------------------------------------------------
-      - name: Verify PR is from this repository (comment trigger only)
-        if: github.event_name == 'issue_comment'
+      - name: Verify PR is from this repository
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -125,9 +90,6 @@ jobs:
       # ---------------------------------------------------------------------
       # STEP 1: Check out the right code
       # ---------------------------------------------------------------------
-      # On pull_request events, github.ref is the merge commit (main + PR
-      # branch) - that's what we want to test.
-      #
       # On issue_comment events, github.ref is the default branch (main).
       # Without this override we'd build and test main's code instead of the
       # PR's code. We resolve the PR head ref explicitly so we test the
@@ -140,7 +102,7 @@ jobs:
       - uses: actions/checkout@v5
         if: ${{ !cancelled() }}
         with:
-          ref: ${{ github.event_name == 'issue_comment' && format('refs/pull/{0}/head', github.event.issue.number) || github.ref }}
+          ref: refs/pull/${{ github.event.issue.number }}/head
 
       # ---------------------------------------------------------------------
       # STEP 2: Install the Rust toolchain
@@ -169,7 +131,8 @@ jobs:
       #     Claude Code expands this at runtime from the env var we set on
       #     the claude-code-action step below. The key never touches disk.
       #
-      # Output: .mcp-ci.json (gitignored, CI-only, thrown away after the run)
+      # Output: .mcp-ci.json (ephemeral, written for this run, discarded with
+      # the runner)
       # ---------------------------------------------------------------------
       - name: Generate MCP config with API key placeholder
         run: |
@@ -186,28 +149,24 @@ jobs:
             }' > .mcp-ci.json
 
       # ---------------------------------------------------------------------
-      # STEP 4: Let Claude Code drive the smoke test
+      # STEP 4: Let Claude Code drive the test
       # ---------------------------------------------------------------------
-      # This is where the magic happens. Instead of scripting each MCP call
-      # by hand (initialize session, capture headers, parse SSE, poll tasks,
-      # parse JSON, handle retries...), we give Claude a prompt and let it
-      # figure out the details.
-      #
       # anthropics/claude-code-action@v1:
-      #   anthropic_api_key - the Claude API key (secret)
+      #   anthropic_api_key - the Anthropic API key (secret)
       #   show_full_output  - print everything Claude does to the job log
       #   prompt            - the instructions Claude follows (automation mode)
       #   claude_args       - extra CLI flags passed to claude
       #
       # Security notes:
-      #   - CHIPLAB_API_KEY is scoped to this step only (not job-level).
-      #     No other step - including cargo build - can see it.
-      #   - The MCP config uses env-var expansion (${CHIPLAB_API_KEY}).
-      #     The actual secret value never appears in a file.
-      #   - --allowedTools locks Claude down to exactly what it needs:
-      #     Bash(cd/cargo/curl/echo) for shell work, Write for the step
-      #     summary, Read for reading files, mcp__chiplab__* for all
-      #     Chiplab MCP tools.
+      #   - CHIPLAB_API_KEY is scoped to this step. It is visible to every
+      #     process Claude spawns, including cargo build via a malicious
+      #     build.rs - which is why fork PRs are blocked before checkout.
+      #   - The MCP config holds the literal ${CHIPLAB_API_KEY} placeholder;
+      #     Claude expands it at connect time, so the secret never lands on
+      #     disk.
+      #   - --allowedTools locks Claude to the tools this flow needs:
+      #     Bash(cd/cargo/curl) for shell work, Read for the docs,
+      #     mcp__chiplab__* for the Chiplab MCP tools.
       # ---------------------------------------------------------------------
       - uses: anthropics/claude-code-action@v1
         env:
@@ -216,26 +175,10 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           show_full_output: true
           prompt: |
-            You are running in GitHub Actions CI as a smoke test for the Chiplab hardware-in-the-loop platform. Execute these steps in order. Write your final summary table to the GitHub Actions step summary. Stop and report failure immediately if any step fails.
+            Build the firmware in examples/bare-metal/stm32f4-discovery and test it on Chiplab, following the workflow in AGENTS.md. Diagnose and report any issues.
 
-            STEP 0 - Discover available tools:
-            Call the Chiplab discovery/help tool first to get the current set of MCP tools and any board-specific guidance. This ensures you use the right tool names even if they change.
-
-            STEP 1 - Build the firmware:
-            cd examples/bare-metal/stm32f4-discovery && cargo build --release
-            Confirm the ELF exists at target/thumbv7m-none-eabi/release/hello-stm32f4-discovery.
-
-            STEP 2 - Upload the ELF to Chiplab:
-            Use the Chiplab MCP tools to get an upload ticket (presigned URL), then upload the ELF binary to that URL. Record the artifact_id.
-
-            STEP 3 - Run the simulation:
-            Use the Chiplab MCP tools to run the uploaded artifact on board 'stm32f4_discovery'. If the run is asynchronous, poll until it completes, then fetch the result. Record the run_id.
-
-            STEP 4 - Verify UART output:
-            Use the Chiplab MCP tools to list the run's artifacts, find the 'stdout' artifact, get a download ticket, download the output, and verify it contains the string 'Hello world!'.
-
-            When all steps pass, output a summary table with a checkmark for Build, Upload, Simulate, and Verify.
+            If the firmware does not build, or the captured UART output does not contain "Hello world!", exit with a non-zero status so the workflow fails.
           claude_args: |
             --model fable
             --mcp-config .mcp-ci.json
-            --allowedTools "Bash(cd:*),Bash(cargo:*),Bash(curl:*),Bash(echo:*),Write,Read,mcp__chiplab__*"
+            --allowedTools "Bash(cd:*),Bash(cargo:*),Bash(curl:*),Read,mcp__chiplab__*"
