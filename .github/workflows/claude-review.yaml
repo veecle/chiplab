@@ -1,0 +1,27 @@
+name: claude-review
+
+# Shared template maintained at https://github.com/veecle/style-guide/blob/main/.github/workflows/claude-review.yaml,
+# copy it unmodified.
+#
+# All filtering and the review itself live in the reusable workflow, see there for details.
+# Keep referencing it from `veecle/style-guide` at `main`: the Anthropic federation rule only trusts that exact
+# workflow ref, any other ref (or a local copy) fails to authenticate.
+
+on:
+  pull_request:
+    types: [opened, ready_for_review]
+    paths-ignore:
+      - '.github/workflows/claude-review.yaml'
+  issue_comment:
+    types: [created]
+
+jobs:
+  claude-review:
+    uses: veecle/style-guide/.github/workflows/reusable-claude-review.yaml@main
+
+    # Upper bound for the jobs in the reusable workflow, which narrow them down per job.
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+      actions: read
