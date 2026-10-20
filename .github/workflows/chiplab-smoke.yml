@@ -1,0 +1,77 @@
+# Deterministic Chiplab smoke test: build the bare-metal stm32f4-discovery example and
+# run it on a virtual board via chiplab-cli, asserting "Hello world!" on USART2.
+# Doubles as a template for integrating chiplab-cli into your own CI.
+#
+# Requires:
+#   secrets.CHIPLAB_API_KEY   - Chiplab personal access token (veecle_pat_*) for the
+#                               account owning the project below (see AGENTS.md)
+#
+# Every run costs Chiplab credits, so it only triggers on changes to that example.
+name: Chiplab smoke test
+
+on:
+  push:
+    branches: [main]
+    paths: &paths
+      - "examples/bare-metal/stm32f4-discovery/**"
+      - ".github/chiplab/**"
+      - ".github/workflows/chiplab-smoke.yml"
+  pull_request:
+    paths: *paths
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  stm32f4-discovery:
+    name: bare-metal/stm32f4-discovery
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # Secrets are not available to fork PRs; skip instead of failing.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: thumbv7m-none-eabi
+
+      - name: Build firmware
+        working-directory: examples/bare-metal/stm32f4-discovery
+        run: cargo build --release --locked
+
+      - name: Install chiplab-cli
+        run: |
+          dir=$(mktemp -d "$RUNNER_TEMP/chiplab-cli.XXXXXX")
+          cd "$dir"
+          curl -fsSLO https://github.com/veecle/chiplab-cli/releases/latest/download/chiplab-cli-x86_64-unknown-linux-musl.tar.gz
+          curl -fsSLO https://github.com/veecle/chiplab-cli/releases/latest/download/sha256sums.txt
+          sha256sum --check --ignore-missing sha256sums.txt
+          tar -xzf chiplab-cli-x86_64-unknown-linux-musl.tar.gz
+          echo "$dir" >> "$GITHUB_PATH"
+
+      - name: Run smoke test on Chiplab
+        env:
+          CHIPLAB_TOKEN: ${{ secrets.CHIPLAB_API_KEY }}
+          # "chiplab examples CI (chiplab-smoke)"; keep in sync with AGENTS.md.
+          CHIPLAB_PROJECT_ID: project_01m5cxr7ghex8rqx3n91nz180f
+        run: |
+          chiplab-cli run-test-suite \
+            --project "$CHIPLAB_PROJECT_ID" \
+            --firmware examples/bare-metal/stm32f4-discovery/target/thumbv7m-none-eabi/release/hello-stm32f4-discovery \
+            --test-suite .github/chiplab/hello-world.test.ts \
+            --board .github/chiplab/stm32f4-discovery.board.json \
+            --download-dir chiplab-artifacts
+
+      - name: Upload Chiplab artifacts
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: chiplab-artifacts
+          path: chiplab-artifacts
+          if-no-files-found: ignore
