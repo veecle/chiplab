@@ -10,8 +10,14 @@
 # Trigger: comment /smoke-test on any PR (repo owner/member/collaborator only).
 #
 # Secrets required:
-#   CHIPLAB_API_KEY   - API token for Chiplab MCP authentication (veecle_pat_*)
-#   ANTHROPIC_API_KEY - Anthropic API key used by claude-code-action
+#   CHIPLAB_API_KEY - API token for Chiplab MCP authentication (veecle_pat_*)
+#
+# Variables required (Anthropic workload identity federation, no API key):
+#   ANTHROPIC_ORGANIZATION_ID                  - Anthropic organization ID (shared org variable)
+#   ANTHROPIC_CHIPLAB_SMOKE_FEDERATION_RULE_ID - federation rule (fdrl_...) for this workflow
+#   ANTHROPIC_CHIPLAB_SMOKE_SERVICE_ACCOUNT_ID - service account (svac_...) for this workflow
+# The federation rule should trust this workflow's `job_workflow_ref` OIDC claim
+# (veecle/chiplab/.github/workflows/claude-chiplab-smoke.yml@refs/heads/main).
 # ---------------------------------------------------------------------------
 
 name: Chiplab CI
@@ -44,8 +50,9 @@ jobs:
     # -----------------------------------------------------------------------
     # contents: read   - checkout the repo
     # pull-requests: read - the fork-guard step calls `gh pr view`
-    # id-token: write  - claude-code-action uses OIDC to get a GitHub token
-    #                    for its own API calls (not for Anthropic auth).
+    # id-token: write  - claude-code-action exchanges the GitHub OIDC token
+    #                    for Anthropic credentials (workload identity
+    #                    federation) and for a GitHub token for its own calls.
     #                    The error message if this is missing is clear:
     #                    "Could not fetch an OIDC token. Did you remember
     #                    to add id-token: write to your workflow permissions?"
@@ -152,7 +159,9 @@ jobs:
       # STEP 4: Let Claude Code drive the test
       # ---------------------------------------------------------------------
       # anthropics/claude-code-action@v1:
-      #   anthropic_api_key - the Anthropic API key (secret)
+      #   anthropic_*_id    - workload identity federation: the GitHub OIDC
+      #                       token is exchanged for short-lived Anthropic
+      #                       credentials, no long-lived API key involved
       #   show_full_output  - print everything Claude does to the job log
       #   prompt            - the instructions Claude follows (automation mode)
       #   claude_args       - extra CLI flags passed to claude
@@ -161,6 +170,8 @@ jobs:
       #   - CHIPLAB_API_KEY is scoped to this step. It is visible to every
       #     process Claude spawns, including cargo build via a malicious
       #     build.rs - which is why fork PRs are blocked before checkout.
+      #     The same applies to the OIDC token request (id-token: write),
+      #     which can mint Anthropic credentials via the federation rule.
       #   - The MCP config holds the literal ${CHIPLAB_API_KEY} placeholder;
       #     Claude expands it at connect time, so the secret never lands on
       #     disk.
@@ -172,7 +183,9 @@ jobs:
         env:
           CHIPLAB_API_KEY: ${{ secrets.CHIPLAB_API_KEY }}
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          anthropic_federation_rule_id: ${{ vars.ANTHROPIC_CHIPLAB_SMOKE_FEDERATION_RULE_ID }}
+          anthropic_organization_id: ${{ vars.ANTHROPIC_ORGANIZATION_ID }}
+          anthropic_service_account_id: ${{ vars.ANTHROPIC_CHIPLAB_SMOKE_SERVICE_ACCOUNT_ID }}
           show_full_output: true
           prompt: |
             Build the firmware in examples/bare-metal/stm32f4-discovery and test it on Chiplab, following the workflow in AGENTS.md. Diagnose and report any issues.
