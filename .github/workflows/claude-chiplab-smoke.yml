@@ -175,7 +175,7 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           show_full_output: true
           prompt: |
-            Build the firmware in examples/bare-metal/stm32f4-discovery and test it on Chiplab, following the workflow in AGENTS.md. Diagnose and report any issues.
+            Build the firmware in examples/bare-metal/stm32f4-discovery and test it on Chiplab, following the workflow in AGENTS.md. Use the CI project_id given there for claude-chiplab-smoke.yml. Diagnose and report any issues.
 
             If the firmware does not build, or the captured UART output does not contain "Hello world!", exit with a non-zero status so the workflow fails.
           claude_args: |

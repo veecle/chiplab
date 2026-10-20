@@ -80,6 +80,20 @@ The run returns synchronously. Read the captured output, which contains
 `Hello world!` (the `stm32wba52-nucleo` example prints it once per second, so you'll
 see several lines).
 
+## Chiplab projects for this repo's CI
+
+Each of this repo's CI workflows records its runs under its own project, owned by the
+account behind the `CHIPLAB_API_KEY` secret:
+
+| Workflow | `project_id` |
+|---|---|
+| `.github/workflows/chiplab-smoke.yml` | `project_01m5cxr7ghex8rqx3n91nz180f` |
+| `.github/workflows/claude-chiplab-smoke.yml` | `project_01m5cy2mqrehetd0xk0p69r7xg` |
+
+When running in this repo's CI, use the `project_id` for your workflow; don't list or
+create projects. Outside CI (on your own account), resolve or create your own project as
+the discovery/help tool describes, because you won't have access to the projects above.
+
 ## Tool reference
 
 Chiplab exposes its tools over standard MCP tool discovery — your MCP client
