@@ -45,15 +45,7 @@ jobs:
         working-directory: examples/bare-metal/stm32f4-discovery
         run: cargo build --release --locked
 
-      - name: Install chiplab-cli
-        run: |
-          dir=$(mktemp -d "$RUNNER_TEMP/chiplab-cli.XXXXXX")
-          cd "$dir"
-          curl -fsSLO https://github.com/veecle/chiplab-cli/releases/latest/download/chiplab-cli-x86_64-unknown-linux-musl.tar.gz
-          curl -fsSLO https://github.com/veecle/chiplab-cli/releases/latest/download/sha256sums.txt
-          sha256sum --check --ignore-missing sha256sums.txt
-          tar -xzf chiplab-cli-x86_64-unknown-linux-musl.tar.gz
-          echo "$dir" >> "$GITHUB_PATH"
+      - uses: veecle/install-chiplab@v1
 
       - name: Run smoke test on Chiplab
         env:
