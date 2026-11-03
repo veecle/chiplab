@@ -51,6 +51,7 @@ Append `-o=--depth=1` to the `west update` line to skip history as well, taking 
   Adding a board means adding its 3 files, a `west -b` table row, and an entry in the `boards` list of [`.github/workflows/build-examples.yml`](../../.github/workflows/build-examples.yml) (CI fails on an unmapped board) — never a new `west.yml`.
   The shared manifest's `import: name-allowlist` pulls only the HAL modules the boards here actually link (`cmsis`, `cmsis_6`, `hal_stm32`, `hal_nordic`) instead of every mainline HAL — a new board needs a new allowlist entry only if it needs a HAL not already listed.
   Pin `revision:` to a released tag, not a branch, for reproducible builds.
+  Renovate bumps it via a custom manager in [`renovate.json`](../../renovate.json); check that still matches if you change how the `zephyr` project entry is written.
 - **The zephyr checkout is named `zephyr-src`, not `zephyr`.**
   West's own module auto-detection (`zephyr_module.py`) treats any directory that directly contains both `zephyr/CMakeLists.txt` and `zephyr/Kconfig` as an unmarked module.
   Since the checkout nests inside this self/manifest repo, a literal `zephyr` leaf name would make `examples/zephyr-os/` itself match that heuristic (its own `zephyr/` subdir *is* Zephyr's top-level `CMakeLists.txt` + `Kconfig`), registering a phantom module whose Kconfig re-sources `Kconfig.zephyr` — an infinite `recursive 'source'` CMake error.

@@ -37,6 +37,7 @@ make           # arm-none-eabi-gcc
   `startup_<chip>.s`.
 - Keep `configUSE_TIMERS` and other kernel features off unless the example needs them.
 - Pin the kernel to a release tag in the `Makefile` (`KERNEL_TAG`), not a branch.
+  Renovate bumps it via a custom manager in [`renovate.json`](../../renovate.json); check that still matches if you change how the pin is written.
 
 ## Gotchas
 
