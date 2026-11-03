@@ -1,0 +1,54 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "ignorePaths": [],
+  "schedule": ["* * * * 3"],
+  "minimumReleaseAge": "2 days",
+  "automerge": true,
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["* * * * 4"]
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Bump the Zephyr revision in the west manifest (Renovate has no west manager); its imported HAL modules follow Zephyr's own pins",
+      "managerFilePatterns": ["/^examples/zephyr-os/west\\.yml$/"],
+      "matchStrings": ["- name: zephyr\\n\\s+remote: zephyrproject-rtos\\n\\s+revision: (?<currentValue>\\S+)"],
+      "depNameTemplate": "zephyrproject-rtos/zephyr",
+      "datasourceTemplate": "github-tags",
+      "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "description": "Bump the FreeRTOS kernel tag the Makefiles shallow-clone; skips `-kernel-only`, `-LTS-Patch-*` and the date-versioned SMP tag",
+      "managerFilePatterns": ["/^examples/freertos/[^/]+/Makefile$/"],
+      "matchStrings": ["KERNEL_TAG\\s*:=\\s*(?<currentValue>\\S+)"],
+      "depNameTemplate": "FreeRTOS/FreeRTOS-Kernel",
+      "datasourceTemplate": "github-tags",
+      "versioningTemplate": "regex:^V(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
+    },
+    {
+      "customType": "regex",
+      "description": "Bump the ThreadX kernel tag the Makefiles shallow-clone; only `_rel` tags, e.g. v6.4.2_rel or v6.5.1.202602a_rel. The letter suffix marks an upstream re-tag and is ignored when comparing versions",
+      "managerFilePatterns": ["/^examples/threadx/[^/]+/Makefile$/"],
+      "matchStrings": ["KERNEL_TAG\\s*:=\\s*(?<currentValue>\\S+)"],
+      "depNameTemplate": "eclipse-threadx/threadx",
+      "datasourceTemplate": "github-tags",
+      "versioningTemplate": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?(?:\\.(?<build>\\d+)[a-z]?)?_rel$"
+    }
+  ],
+  "packageRules": [
+    { "matchManagers": ["cargo"], "matchUpdateTypes": ["lockFileMaintenance"], "groupName": "cargo lockfile", "commitMessageExtra": "(cargo)" },
+    { "matchManagers": ["npm"], "matchUpdateTypes": ["lockFileMaintenance"], "groupName": "npm lockfile", "commitMessageExtra": "(npm)" },
+
+    {
+      "matchDepNames": ["zephyrproject-rtos/zephyr"],
+      "prBodyNotes": ["Check the toolchain prerequisites in `examples/zephyr-os/` docs against this release's notes; they may name a specific Zephyr version."]
+    },
+    {
+      "matchDepNames": ["eclipse-threadx/threadx"],
+      "prBodyNotes": ["Renovate can't tell letter-suffixed re-tags (e.g. `…a_rel`) apart from the original; check upstream tags and switch to the latest re-tag of this release if there is one."]
+    }
+  ]
+}

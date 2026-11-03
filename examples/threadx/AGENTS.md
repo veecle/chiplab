@@ -30,6 +30,7 @@ make           # arm-none-eabi-gcc
 - Thread stacks and control blocks are static arrays, so no byte pool is needed and the `first_unused_memory` argument goes unused.
   Keep it that way unless an example needs dynamic allocation.
 - Pin the kernel to a release tag in the `Makefile` (`KERNEL_TAG`), not a branch.
+  Renovate bumps it via a custom manager in [`renovate.json`](../../renovate.json); check that still matches if you change how the pin is written.
 - Clone from `eclipse-threadx/threadx` (MIT), never the archived `azure-rtos/threadx` (whose licence only permitted Microsoft-listed hardware).
 
 ## Gotchas
