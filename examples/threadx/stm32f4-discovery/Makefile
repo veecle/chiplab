@@ -7,7 +7,7 @@ CC           := $(CROSS)gcc
 SIZE         := $(CROSS)size
 
 KERNEL_REPO  := https://github.com/eclipse-threadx/threadx.git
-KERNEL_TAG   := v6.5.1.202602a_rel
+KERNEL_TAG   := v6.5.2.202603_rel
 KERNEL_DIR   := threadx-kernel
 PORT_DIR     := $(KERNEL_DIR)/ports/cortex_m4/gnu
 
