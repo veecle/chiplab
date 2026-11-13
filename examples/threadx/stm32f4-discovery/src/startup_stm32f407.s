@@ -1,7 +1,6 @@
-/* Minimal STM32F407 startup: vector table, reset handler (FPU enable, .data copy,
- * .bss zero), and a default handler. The table is named `_vectors` because
- * _tx_initialize_low_level() programs VTOR from that symbol. PendSV binds to the
- * ThreadX port; SysTick binds to this example's handler in tx_low_level.c. */
+/* Minimal STM32F407 startup: vector table, reset handler (VTOR, FPU enable, .data
+ * copy, .bss zero), and a default handler. PendSV binds to the ThreadX port;
+ * SysTick binds to this example's handler in tx_low_level.c. */
 
     .syntax unified
     .cpu cortex-m4
@@ -37,6 +36,11 @@ _vectors:
     .type Reset_Handler, %function
 Reset_Handler:
     ldr   sp, =_estack
+
+    /* Point VTOR at the vector table in FLASH rather than relying on the boot alias at 0. */
+    ldr   r0, =0xE000ED08
+    ldr   r1, =_vectors
+    str   r1, [r0]
 
     /* Grant full access to CP10/CP11 — the firmware is built for the hard-float
      * ABI, so the FPU must be on before any VFP instruction retires. */

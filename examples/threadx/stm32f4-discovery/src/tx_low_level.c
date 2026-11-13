@@ -7,25 +7,22 @@
 
 #include "tx_api.h"
 
-#define SCB_VTOR              ( *( volatile uint32_t * )0xE000ED08UL )
 #define SCB_SHPR2             ( *( volatile uint32_t * )0xE000ED1CUL )
 #define SCB_SHPR3             ( *( volatile uint32_t * )0xE000ED20UL )
 
 #define SYSTICK_CTRL          ( *( volatile uint32_t * )0xE000E010UL )
 #define SYSTICK_LOAD          ( *( volatile uint32_t * )0xE000E014UL )
+#define SYSTICK_VAL           ( *( volatile uint32_t * )0xE000E018UL )
 #define SYSTICK_CTRL_ENABLE   ( 1UL << 0 )
 #define SYSTICK_CTRL_TICKINT  ( 1UL << 1 )
 #define SYSTICK_CTRL_CLKSOURCE ( 1UL << 2 )
 
 #define SYSTEM_CLOCK_HZ       16000000UL
 
-/* Defined by the linker script and the startup file. */
-extern uint32_t _estack;
+/* Defined by the linker script. */
 extern uint32_t _ebss;
-extern const uint32_t _vectors[];
 
-/* Kernel-owned globals and the port's tick entry point. */
-extern void *_tx_thread_system_stack_ptr;
+/* Kernel-owned global and the port's tick entry point. */
 extern void *_tx_initialize_unused_memory;
 void _tx_timer_interrupt( void );
 
@@ -35,15 +32,14 @@ void _tx_initialize_low_level( void )
     __asm volatile ( "cpsid i" ::: "memory" );
 
     _tx_initialize_unused_memory = ( void * ) &_ebss;
-    _tx_thread_system_stack_ptr = ( void * ) &_estack;
-
-    SCB_VTOR = ( uint32_t ) _vectors;
 
     /* SVCall and PendSV must sit at the lowest priority (0xFF) for the port's
      * context switch to be tail-chained after every other exception. */
     SCB_SHPR2 = 0xFF000000UL;
     SCB_SHPR3 = 0x40FF0000UL;
 
+    SYSTICK_CTRL = 0UL;
+    SYSTICK_VAL  = 0UL;
     SYSTICK_LOAD = ( SYSTEM_CLOCK_HZ / TX_TIMER_TICKS_PER_SECOND ) - 1UL;
     SYSTICK_CTRL = SYSTICK_CTRL_CLKSOURCE | SYSTICK_CTRL_TICKINT | SYSTICK_CTRL_ENABLE;
 }
