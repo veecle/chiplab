@@ -37,7 +37,7 @@ make           # arm-none-eabi-gcc
 
 - **The app owns `_tx_initialize_low_level`** — unlike FreeRTOS, the Cortex-M ThreadX port does not ship one for your board.
   It lives in the port's `example_build/` as reference only.
-  `src/tx_low_level.c` is this repo's C equivalent: it must set `_tx_initialize_unused_memory` and `_tx_thread_system_stack_ptr`, program `VTOR`, set the exception priorities, and start SysTick.
+  `src/tx_low_level.c` is this repo's C equivalent: it must set `_tx_initialize_unused_memory`, set the exception priorities, and start SysTick.
 - **`__RAM_segment_used_end__` is a port-example symbol, not a requirement** — the reference assembly derives first-unused-memory from it.
   Our C version uses the linker script's `_ebss` instead, so the linker script doesn't need that symbol at all.
 - **Handler names** — the port defines `PendSV_Handler` (aliased `__tx_PendSVHandler`) in `tx_thread_schedule.S`; the vector table must reference it or the context switch never fires.
