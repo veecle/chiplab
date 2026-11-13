@@ -11,6 +11,6 @@
     "docs:validate": "cd docs && mint validate"
   },
   "devDependencies": {
-    "mint": "4.2.667"
+    "mint": "4.3.16"
   }
 }
