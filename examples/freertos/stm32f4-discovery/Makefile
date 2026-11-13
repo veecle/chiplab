@@ -7,7 +7,7 @@ CC           := $(CROSS)gcc
 SIZE         := $(CROSS)size
 
 KERNEL_REPO  := https://github.com/FreeRTOS/FreeRTOS-Kernel.git
-KERNEL_TAG   := V11.3.0
+KERNEL_TAG   := V11.3.3
 KERNEL_DIR   := freertos-kernel
 PORT_DIR     := $(KERNEL_DIR)/portable/GCC/ARM_CM4F
 
