@@ -5,6 +5,10 @@ target/
 .DS_Store
 node_modules/
 
+# nix build output symlinks
+result
+result-*
+
 # Zephyr / west workspace artifacts (pulled by `west update`, never committed).
 # examples/zephyr-os/ commits one shared west.yml plus each board's baseline app;
 # users run `west init -l . && west update` to populate the workspace below.

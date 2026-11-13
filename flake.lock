@@ -1,0 +1,119 @@
+{
+  "nodes": {
+    "chiplab-cli": {
+      "inputs": {
+        "flake-parts": [
+          "flake-parts"
+        ],
+        "make-shell": [
+          "make-shell"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "rust-overlay": [
+          "rust-overlay"
+        ]
+      },
+      "locked": {
+        "lastModified": 1794561010,
+        "narHash": "sha256-fJdGKz0ZhEDcXR+QT1tJAavQU7tY3KFpaeKFc9oMsvk=",
+        "owner": "veecle",
+        "repo": "chiplab-cli",
+        "rev": "0aca917669e8c999f668c0666ba7e553bc10fa37",
+        "type": "github"
+      },
+      "original": {
+        "owner": "veecle",
+        "ref": "v0.1.1",
+        "repo": "chiplab-cli",
+        "type": "github"
+      }
+    },
+    "flake-parts": {
+      "inputs": {
+        "nixpkgs-lib": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793576659,
+        "narHash": "sha256-V1h85lUaJBQoHFrB2vpXZOE0Ju1MYSnIpsehoVZYlDo=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "ea2630b7470978622c7689a1ff75d2b389175399",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "type": "github"
+      }
+    },
+    "make-shell": {
+      "inputs": {
+        "flake-compat": []
+      },
+      "locked": {
+        "lastModified": 1733933815,
+        "narHash": "sha256-9JjM7eT66W4NJAXpGUsdyAFXhBxFWR2Z9LZwUa7Hli0=",
+        "owner": "nicknovitski",
+        "repo": "make-shell",
+        "rev": "ffeceae9956df03571ea8e96ef77c2924f13a63c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nicknovitski",
+        "repo": "make-shell",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1794819152,
+        "narHash": "sha256-a7ymvqbsg5NlcTrtJLF26UqbfLFNiHpxnaE9em5NzT8=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "c089fab3b46743911df4c60199f6d0b20c4fb834",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-26.05-small",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "chiplab-cli": "chiplab-cli",
+        "flake-parts": "flake-parts",
+        "make-shell": "make-shell",
+        "nixpkgs": "nixpkgs",
+        "rust-overlay": "rust-overlay"
+      }
+    },
+    "rust-overlay": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1794820811,
+        "narHash": "sha256-z43rmhOmnCG4gN2EcSm4tzHUSRg7DG5SaGscYreafzg=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "2ff7d39b901d79ee26d26f9fa32f90511eecaa0e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
