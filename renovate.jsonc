@@ -7,6 +7,9 @@
   // Automerge does not bypass review: merges still have to satisfy the default branch's ruleset like any other PR.
   // Enabling it does not by itself let updates reach production unreviewed.
   "automerge": true,
+  "nix": {
+    "enabled": true
+  },
   "lockFileMaintenance": {
     "enabled": true,
     "schedule": ["* * * * 4"]
@@ -44,6 +47,7 @@
   "packageRules": [
     { "matchManagers": ["cargo"], "matchUpdateTypes": ["lockFileMaintenance"], "groupName": "cargo lockfile", "commitMessageExtra": "(cargo)" },
     { "matchManagers": ["npm"], "matchUpdateTypes": ["lockFileMaintenance"], "groupName": "npm lockfile", "commitMessageExtra": "(npm)" },
+    { "matchManagers": ["nix"], "matchUpdateTypes": ["lockFileMaintenance"], "groupName": "flake lockfile", "commitMessageExtra": "(flake)" },
 
     {
       "matchDepNames": ["zephyrproject-rtos/zephyr"],
