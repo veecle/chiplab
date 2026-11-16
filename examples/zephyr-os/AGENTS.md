@@ -5,7 +5,7 @@ For the connect → upload → run contract see the [root AGENTS.md](../../AGENT
 
 ## Toolchain & build
 
-Needs `west` + the Zephyr SDK (plus **Python ≥ 3.12** — Zephyr 4.4 requires it — CMake ≥ 3.20, Ninja, `dtc`).
+Needs `west` + the Zephyr SDK (plus **Python ≥ 3.12** and **CMake ≥ 3.28** — Zephyr's own minimums — Ninja, `dtc`).
 Unlike the other frameworks, every board here shares **one west workspace** whose manifest repo is this directory (`examples/zephyr-os/`): a single `west.yml` manifest lives here, and each board subfolder commits only its baseline app (`CMakeLists.txt`, `prj.conf`, `src/main.c`).
 Three separate steps populate that workspace: `west update` pulls the Zephyr tree and the HAL modules into this directory, `pip` installs Zephyr's build-time Python dependencies into the active virtualenv, and `west sdk install` unpacks the cross-compiler into the user's home directory (`~/zephyr-sdk-<version>/`, outside this repo).
 The pulled trees, `build/`, and `.venv/` are gitignored — never commit them.
@@ -69,7 +69,7 @@ Append `-o=--depth=1` to the `west update` line to skip history as well, taking 
   The nRF52840 DK defaults to `zephyr,console = &uart0`, which Chiplab captures — so `prj.conf` stays empty.
 - **`west sdk install` needs a workspace** — it's unavailable until after `west init` + `west update`, so run it in that order.
 - **Python ≥ 3.12, but not bleeding-edge.**
-  Zephyr 4.4 requires ≥ 3.12; some build deps (e.g. `jsonschema`) lack wheels for the newest releases.
+  Zephyr requires ≥ 3.12; some build deps (e.g. `jsonschema`) lack wheels for the newest releases.
   Python 3.13 in a venv is the safe choice.
   The CMake error `Missing jsonschema dependency` means the build-time requirements aren't installed in the active interpreter — `pip install -r zephyr-src/scripts/requirements-base.txt`.
 - **STM32H745 is dual-core** — target the Cortex-M7 core qualifier (`nucleo_h745zi_q/stm32h745xx/m7`); the board's default console (`usart3`) is only wired up on that core's defconfig.
