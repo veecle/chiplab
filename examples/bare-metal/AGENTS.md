@@ -14,7 +14,7 @@ so `cargo build --release` in the example dir is enough; install the target once
 | stm32f7-discovery | `thumbv7em-none-eabi` |
 | stm32f103-blue-pill | `thumbv7m-none-eabi` |
 | stm32l073-nucleo | `thumbv6m-none-eabi` |
-| stm32h745-nucleo | `thumbv7em-none-eabihf` |
+| stm32h753-nucleo | `thumbv7em-none-eabihf` |
 | nrf52840-dk | `thumbv7em-none-eabihf` |
 
 ```sh
@@ -38,4 +38,3 @@ cargo build --release
   ([cortex-m-quickstart#95](https://github.com/rust-embedded/cortex-m-quickstart/pull/95)).
 - **nRF52840** (`nrf52840-hal`): the UARTE TX buffer must live in RAM — EasyDMA can't
   read from flash, so copy the message to the stack.
-- **STM32H745** is dual-core; this example targets the Cortex-M7 (`thumbv7em-none-eabihf`).

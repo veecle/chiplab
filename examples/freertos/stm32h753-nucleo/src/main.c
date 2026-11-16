@@ -1,4 +1,4 @@
-/* STM32H745 Nucleo (Cortex-M7 core): a FreeRTOS task prints "Hello world!" over USART3 (PD8). */
+/* STM32H753 Nucleo: a FreeRTOS task prints "Hello world!" over USART3 (PD8). */
 
 #include <stdint.h>
 
@@ -6,7 +6,7 @@
 #include "task.h"
 
 /* H7 peripherals (other than USART) live in the AHB4 domain at 0x5800_0000+,
- * not the 0x4000_0000 range used on F1/F4/F7 — see RM0399. */
+ * not the 0x4000_0000 range used on F1/F4/F7 — see RM0433. */
 #define RCC_BASE           0x58024400UL
 #define RCC_AHB4ENR        ( *( volatile uint32_t * )( RCC_BASE + 0xE0UL ) )
 #define RCC_APB1LENR       ( *( volatile uint32_t * )( RCC_BASE + 0xE8UL ) )

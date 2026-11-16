@@ -17,7 +17,7 @@ This directory (`examples/zephyr-os/`) is the west **manifest repo** (T2 topolog
 | stm32f4-discovery | `stm32f4_disco` | `stm32f4_discovery` |
 | stm32f7-discovery | `stm32f746g_disco` | `stm32f7_discovery` |
 | stm32l073-nucleo | `nucleo_l073rz` | `stm32l073_nucleo` |
-| stm32h745-nucleo | `nucleo_h745zi_q/stm32h745xx/m7` | `stm32h745_nucleo` |
+| stm32h753-nucleo | `nucleo_h753zi` | `stm32h753_nucleo` |
 | nrf52840-dk | `nrf52840dk/nrf52840` | `nrf52840_dk` |
 
 ```sh
@@ -72,5 +72,4 @@ Append `-o=--depth=1` to the `west update` line to skip history as well, taking 
   Zephyr requires ≥ 3.12; some build deps (e.g. `jsonschema`) lack wheels for the newest releases.
   Python 3.13 in a venv is the safe choice.
   The CMake error `Missing jsonschema dependency` means the build-time requirements aren't installed in the active interpreter — `pip install -r zephyr-src/scripts/requirements-base.txt`.
-- **STM32H745 is dual-core** — target the Cortex-M7 core qualifier (`nucleo_h745zi_q/stm32h745xx/m7`); the board's default console (`usart3`) is only wired up on that core's defconfig.
 - **STM32F103 Blue Pill and STM32WBA52 Nucleo have no upstream Zephyr board yet** — mainline Zephyr ships Nucleo boards for other WBA variants (WBA25/55/65) and no community port of the generic "Blue Pill" clone board, so these two need a custom out-of-tree board port (dts/Kconfig/board.cmake) before an example can exist here.

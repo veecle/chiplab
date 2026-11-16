@@ -24,7 +24,7 @@ The Arm bare-metal GCC (`arm-none-eabi-gcc`) and `make`:
 | stm32f7-discovery | STM32F746 | `GCC/ARM_CM7/r0p1` | `stm32f7_discovery` |
 | stm32f103-blue-pill | STM32F103 | `GCC/ARM_CM3` | `stm32f103_blue_pill` |
 | stm32l073-nucleo | STM32L073 | `GCC/ARM_CM0` | `stm32l073_nucleo` |
-| stm32h745-nucleo | STM32H745 | `GCC/ARM_CM7/r0p1` | `stm32h745_nucleo` |
+| stm32h753-nucleo | STM32H753 | `GCC/ARM_CM7/r0p1` | `stm32h753_nucleo` |
 | nrf52840-dk | nRF52840 | `GCC/ARM_CM4F` | `nrf52840_dk` |
 
 ## Build

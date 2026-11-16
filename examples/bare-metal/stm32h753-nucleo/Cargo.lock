@@ -69,12 +69,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "790eea4361631c5e7d22598ecd5723ff611904e3344ce8720784c93e3d83d40b"
 
 [[package]]
-name = "embedded-display-controller"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "abdb518d44a2eda3b8a5dfc27b60a4bbbf2bb87eee436796d54c290ee6cc6545"
-
-[[package]]
 name = "embedded-dma"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -115,7 +109,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1d758ba1b47b00caf47f24925c0074ecb20d6dfcffe7f6d53395c0465674841a"
 
 [[package]]
-name = "hello-stm32h745-nucleo"
+name = "hello-stm32h753-nucleo"
 version = "0.1.0"
 dependencies = [
  "cortex-m-rt",
@@ -219,7 +213,6 @@ dependencies = [
  "bare-metal 1.0.0",
  "cast",
  "cortex-m",
- "embedded-display-controller",
  "embedded-dma",
  "embedded-hal",
  "embedded-storage",

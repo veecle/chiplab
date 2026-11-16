@@ -1,7 +1,7 @@
-# FreeRTOS hello-world on STM32H745 Nucleo (Cortex-M7 core), built with arm-none-eabi-gcc.
+# FreeRTOS hello-world on STM32H753 Nucleo, built with arm-none-eabi-gcc.
 # `make setup` shallow-clones the FreeRTOS kernel (gitignored); `make` builds the ELF.
 
-PROJECT      := hello-stm32h745-nucleo
+PROJECT      := hello-stm32h753-nucleo
 CROSS        := arm-none-eabi-
 CC           := $(CROSS)gcc
 SIZE         := $(CROSS)size
@@ -28,7 +28,7 @@ C_SOURCES    := src/main.c \
                 $(KERNEL_DIR)/queue.c \
                 $(PORT_DIR)/port.c \
                 $(KERNEL_DIR)/portable/MemMang/heap_4.c
-ASM_SOURCES  := src/startup_stm32h745.s
+ASM_SOURCES  := src/startup_stm32h753.s
 
 OBJECTS      := $(addprefix $(BUILD_DIR)/,$(C_SOURCES:.c=.o) $(ASM_SOURCES:.s=.o))
 

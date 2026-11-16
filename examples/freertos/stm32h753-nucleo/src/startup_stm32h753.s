@@ -1,4 +1,4 @@
-/* Minimal STM32H745 (Cortex-M7 core) startup: vector table, reset handler (.data
+/* Minimal STM32H753 (Cortex-M7) startup: vector table, reset handler (.data
  * copy + .bss zero), and weak default handlers. The three kernel-owned exceptions
  * (SVC/PendSV/SysTick) are left non-weak so they bind to the FreeRTOS port
  * implementations. */

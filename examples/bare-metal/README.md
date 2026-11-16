@@ -15,7 +15,7 @@ board's target once:
 | stm32f7-discovery | `thumbv7em-none-eabi` |
 | stm32f103-blue-pill | `thumbv7m-none-eabi` |
 | stm32l073-nucleo | `thumbv6m-none-eabi` |
-| stm32h745-nucleo | `thumbv7em-none-eabihf` |
+| stm32h753-nucleo | `thumbv7em-none-eabihf` |
 | nrf52840-dk | `thumbv7em-none-eabihf` |
 
 ## Build

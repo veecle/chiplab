@@ -31,7 +31,7 @@ west sdk install -t arm-zephyr-eabi                     # cross-compiler -> ~/ze
 | stm32f4-discovery | `stm32f4_disco` | `stm32f4_discovery` |
 | stm32f7-discovery | `stm32f746g_disco` | `stm32f7_discovery` |
 | stm32l073-nucleo | `nucleo_l073rz` | `stm32l073_nucleo` |
-| stm32h745-nucleo | `nucleo_h745zi_q/stm32h745xx/m7` | `stm32h745_nucleo` |
+| stm32h753-nucleo | `nucleo_h753zi` | `stm32h753_nucleo` |
 | nrf52840-dk | `nrf52840dk/nrf52840` | `nrf52840_dk` |
 
 ## Build
