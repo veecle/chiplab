@@ -17,7 +17,7 @@ app per board (`Makefile`, `src/main.c`, `src/FreeRTOSConfig.h`, `src/startup_<c
 | stm32f7-discovery | STM32F746 | `GCC/ARM_CM7/r0p1` | `stm32f7_discovery` |
 | stm32f103-blue-pill | STM32F103 | `GCC/ARM_CM3` | `stm32f103_blue_pill` |
 | stm32l073-nucleo | STM32L073 | `GCC/ARM_CM0` | `stm32l073_nucleo` |
-| stm32h745-nucleo | STM32H745 | `GCC/ARM_CM7/r0p1` | `stm32h745_nucleo` |
+| stm32h753-nucleo | STM32H753 | `GCC/ARM_CM7/r0p1` | `stm32h753_nucleo` |
 | nrf52840-dk | nRF52840 | `GCC/ARM_CM4F` | `nrf52840_dk` |
 
 ```sh
@@ -63,10 +63,9 @@ make           # arm-none-eabi-gcc
   `SWS` to match `SW` after the clock-switch write, so poll `HSI16RDY` only and treat
   the `SW` write as fire-and-forget — polling `SWS` to confirm the switch spins forever
   in simulation.
-- **STM32H745** is dual-core; this example targets the Cortex-M7 (the
-  `GCC/ARM_CM7/r0p1` port). It is a second clock exception: its `configCPU_CLOCK_HZ`
-  and USART `BRR` assume 16 MHz like the F4/F7 examples (validated on Chiplab), not
-  the chip's 64 MHz reset-default HSI — see the note in its `main.c`.
+- **STM32H753** is a second clock exception: its `configCPU_CLOCK_HZ` and USART
+  `BRR` assume 16 MHz like the F4/F7 examples (validated on Chiplab), not the chip's
+  64 MHz reset-default HSI — see the note in its `main.c`.
 - **Tickless idle off** — leave `configUSE_TICKLESS_IDLE` disabled; sleep modes can
   stall the simulation.
 - **The ELF is `build/hello-<board>.elf`** — upload that path.

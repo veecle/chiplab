@@ -1,11 +1,11 @@
-/* STM32H745XIH6 (Cortex-M7 core): 1 MB usable FLASH bank, D1 domain SRAM at
+/* STM32H753ZI: 2 MB FLASH, D1 domain SRAM at
  * 0x24000000 (NOT 0x20000000 as on F1/F4/F7 — H7 SRAM lives in the D1 domain). */
 
 ENTRY(Reset_Handler)
 
 MEMORY
 {
-    FLASH (rx)  : ORIGIN = 0x08000000, LENGTH = 1024K
+    FLASH (rx)  : ORIGIN = 0x08000000, LENGTH = 2048K
     RAM   (rwx) : ORIGIN = 0x24000000, LENGTH = 512K
 }
 

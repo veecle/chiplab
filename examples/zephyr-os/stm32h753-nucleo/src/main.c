@@ -1,4 +1,4 @@
-/* STM32H745 Nucleo (Cortex-M7 core): print "Hello world!" over the default Zephyr
+/* STM32H753 Nucleo: print "Hello world!" over the default Zephyr
  * console (usart3).
  */
 

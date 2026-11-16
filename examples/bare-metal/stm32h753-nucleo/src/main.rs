@@ -1,4 +1,4 @@
-//! Hello world on the STM32H745 Nucleo via direct USART3 register writes.
+//! Hello world on the STM32H753 Nucleo via direct USART3 register writes.
 
 #![no_main]
 #![no_std]

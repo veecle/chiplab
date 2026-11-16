@@ -1,4 +1,4 @@
-/* FreeRTOS config for STM32H745 (Cortex-M7 core). configCPU_CLOCK_HZ assumes
+/* FreeRTOS config for STM32H753 (Cortex-M7). configCPU_CLOCK_HZ assumes
  * 16 MHz like the F4/F7 examples (validated on Chiplab); the real chip boots on
  * HSI at 64 MHz (see main.c), so on hardware the tick would run 4x fast. */
 
