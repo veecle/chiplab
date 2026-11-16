@@ -15,7 +15,7 @@ manifest:
   projects:
     - name: zephyr
       remote: zephyrproject-rtos
-      revision: v4.4.1
+      revision: v4.5.0
       # Explicit path (not the default-derived "zephyr"): west's own module
       # auto-detection (zephyr_module.py) treats any directory that directly
       # contains both zephyr/CMakeLists.txt and zephyr/Kconfig as an unmarked
