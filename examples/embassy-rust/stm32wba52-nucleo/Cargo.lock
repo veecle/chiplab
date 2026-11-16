@@ -105,15 +105,28 @@ dependencies = [
 
 [[package]]
 name = "cortex-m"
-version = "0.7.7"
+version = "0.7.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8ec610d8f49840a5b376c69663b6369e71f4b34484b9b2eb29fb918d92516cb9"
+checksum = "408ca8c6d703a196b73219fdb68fd8914d4fda90c34e2bd6859d4842f761bd5f"
 dependencies = [
  "bare-metal",
  "bitfield",
+ "cortex-m-macros",
  "critical-section",
  "embedded-hal 0.2.7",
+ "embedded-hal 1.0.0",
  "volatile-register",
+]
+
+[[package]]
+name = "cortex-m-macros"
+version = "0.7.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6d1922be58519ad40368fc4ca595a2cefa51a7abf947be3b0c90586dc7dbd0e2"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.117",
 ]
 
 [[package]]
