@@ -9,7 +9,7 @@ Every board here shares **one west workspace** whose manifest repo is this direc
 
 ## Toolchain
 
-You need `west`, the Zephyr SDK, **Python ≥ 3.12** (Zephyr 4.4 requires it), CMake ≥ 3.20, Ninja, and the devicetree compiler (`dtc`) — see the [Zephyr getting-started guide][getting-started].
+You need `west`, the Zephyr SDK, **Python ≥ 3.12**, **CMake ≥ 3.28** (Zephyr's own minimums), Ninja, and the devicetree compiler (`dtc`) — see the [Zephyr getting-started guide][getting-started].
 Work inside a Python virtual environment so Zephyr's build dependencies don't collide with the system interpreter:
 
 ```sh
