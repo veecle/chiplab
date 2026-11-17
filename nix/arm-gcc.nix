@@ -13,7 +13,7 @@
         owner = "FreeRTOS";
         repo = "FreeRTOS-Kernel";
         hashes = {
-          "V11.3.0" = "sha256-3LTFe9k42VHzqG8dxYPcR1Pd/uz4umf7UN7Y9TxmCrQ=";
+          "V11.3.3" = "sha256-tDp8tmGlbnedguAjsQFUfRClq4OR7n2utTE+UZ8Kmmw=";
         };
       };
       threadx = {
