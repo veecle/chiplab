@@ -24,6 +24,8 @@ cargo build --release
 # ELF: target/<rust-target>/release/hello-<board>
 ```
 
+With Nix, `nix develop` provides a toolchain with every target, and `nix build .#embassy-rust-<board>` from the repo root builds the ELF to `result/hello-<board>.elf`.
+
 ## Conventions
 
 - Files: `Cargo.toml`, `.cargo/config.toml`, `build.rs`, `src/main.rs` (+ `memory.x` on

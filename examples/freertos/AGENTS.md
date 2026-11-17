@@ -27,6 +27,8 @@ make           # arm-none-eabi-gcc
 # ELF: build/hello-<board>.elf
 ```
 
+With Nix, `nix build .#freertos-<board>` from the repo root builds it to `result/hello-<board>.elf` instead, fetching the kernel itself in place of `make setup`.
+
 ## Conventions
 
 - One header comment line in `main.c` naming the board and UART. No vendor HAL — drive
@@ -38,6 +40,7 @@ make           # arm-none-eabi-gcc
 - Keep `configUSE_TIMERS` and other kernel features off unless the example needs them.
 - Pin the kernel to a release tag in the `Makefile` (`KERNEL_TAG`), not a branch.
   Renovate bumps it via a custom manager; check that still matches if you change how the pin is written.
+  [`nix/arm-gcc.nix`](../../nix/arm-gcc.nix) reads the tag from the `Makefile` but keeps the source hash per tag, so a new tag needs its hash added there too.
 
 ## Gotchas
 

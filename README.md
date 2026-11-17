@@ -96,6 +96,9 @@ The full board × framework matrix is in **[supported-boards.md](supported-board
 Toolchain and build details live in each framework's directory (`examples/<framework>/README.md` for humans, `AGENTS.md` for agents) — your agent finds them on its own.
 Prefer building by hand?
 Each framework README has the exact commands.
+With [Nix], `nix develop` (or `direnv allow`) provides every framework's toolchain, and `nix build .#<framework>-<board>` builds the `bare-metal`, `embassy-rust`, `freertos` and `threadx` examples to `result/hello-<board>.elf`.
+
+[Nix]: https://nixos.org
 
 To run your own firmware, build an ELF for a supported board and ask your agent to upload and run it the same way.
 
