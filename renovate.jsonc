@@ -4,33 +4,36 @@
   "ignorePaths": [],
   "schedule": ["* * * * 3"],
   "minimumReleaseAge": "2 days",
+  // Automerge does not bypass review: merges still have to satisfy the default branch's ruleset like any other PR.
+  // Enabling it does not by itself let updates reach production unreviewed.
   "automerge": true,
   "lockFileMaintenance": {
     "enabled": true,
     "schedule": ["* * * * 4"]
   },
   "customManagers": [
+    // Bump the Zephyr revision in the west manifest (Renovate has no west manager); its imported HAL modules follow Zephyr's own pins
     {
       "customType": "regex",
-      "description": "Bump the Zephyr revision in the west manifest (Renovate has no west manager); its imported HAL modules follow Zephyr's own pins",
       "managerFilePatterns": ["/^examples/zephyr-os/west\\.yml$/"],
       "matchStrings": ["- name: zephyr\\n\\s+remote: zephyrproject-rtos\\n\\s+revision: (?<currentValue>\\S+)"],
       "depNameTemplate": "zephyrproject-rtos/zephyr",
       "datasourceTemplate": "github-tags",
       "versioningTemplate": "semver"
     },
+    // Bump the FreeRTOS kernel tag the Makefiles shallow-clone; skips `-kernel-only`, `-LTS-Patch-*` and the date-versioned SMP tag
     {
       "customType": "regex",
-      "description": "Bump the FreeRTOS kernel tag the Makefiles shallow-clone; skips `-kernel-only`, `-LTS-Patch-*` and the date-versioned SMP tag",
       "managerFilePatterns": ["/^examples/freertos/[^/]+/Makefile$/"],
       "matchStrings": ["KERNEL_TAG\\s*:=\\s*(?<currentValue>\\S+)"],
       "depNameTemplate": "FreeRTOS/FreeRTOS-Kernel",
       "datasourceTemplate": "github-tags",
       "versioningTemplate": "regex:^V(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
     },
+    // Bump the ThreadX kernel tag the Makefiles shallow-clone; only `_rel` tags, e.g. v6.4.2_rel or v6.5.1.202602a_rel.
+    // The letter suffix marks an upstream re-tag and is ignored when comparing versions
     {
       "customType": "regex",
-      "description": "Bump the ThreadX kernel tag the Makefiles shallow-clone; only `_rel` tags, e.g. v6.4.2_rel or v6.5.1.202602a_rel. The letter suffix marks an upstream re-tag and is ignored when comparing versions",
       "managerFilePatterns": ["/^examples/threadx/[^/]+/Makefile$/"],
       "matchStrings": ["KERNEL_TAG\\s*:=\\s*(?<currentValue>\\S+)"],
       "depNameTemplate": "eclipse-threadx/threadx",
