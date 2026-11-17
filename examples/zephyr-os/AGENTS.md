@@ -32,6 +32,9 @@ west build -b <west-board> -d build/<board> <board>     # e.g. -d build/nrf52840
 # ELF: build/<board>/zephyr/zephyr.elf
 ```
 
+With Nix, `nix develop` replaces the venv, both `pip install`s and `west sdk install`: it provides `west` and the Python deps, and builds with nixpkgs' `arm-none-eabi-gcc` (`ZEPHYR_TOOLCHAIN_VARIANT=gnuarmemb`), as the prebuilt Zephyr SDK doesn't run on NixOS.
+`west init -l .` and `west update --narrow` are still needed to pull the Zephyr tree, and there is no `nix build` package for these examples.
+
 Append `-o=--depth=1` to the `west update` line to skip history as well, taking roughly a third off the workspace size — see the shallow-fetch gotcha below for the tradeoffs.
 
 ## Conventions

@@ -69,6 +69,10 @@ The Rust frameworks require Rust ≥ 1.85 (for `edition = "2024"`); run `rustup 
 stable` if needed. Per-board targets and concrete examples are in each framework's
 `examples/<framework>/AGENTS.md`.
 
+If Nix is available, `nix develop` provides every framework's toolchain instead, and
+`nix build .#<framework>-<board>` builds the non-Zephyr examples to
+`result/hello-<board>.elf`.
+
 ## 5. Run it on Chiplab
 
 Upload the ELF, then run it on the target board — the same flow for every board, only
