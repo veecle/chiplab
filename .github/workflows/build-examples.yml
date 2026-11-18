@@ -13,7 +13,7 @@ jobs:
     name: Rust (bare-metal + embassy-rust)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: thumbv6m-none-eabi,thumbv7m-none-eabi,thumbv7em-none-eabi,thumbv7em-none-eabihf,thumbv8m.main-none-eabihf
@@ -29,7 +29,7 @@ jobs:
     name: FreeRTOS
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Install arm-none-eabi-gcc
         run: sudo apt-get update && sudo apt-get install -y gcc-arm-none-eabi
       - name: Build every freertos example
@@ -44,7 +44,7 @@ jobs:
     name: ThreadX
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Install arm-none-eabi-gcc
         run: sudo apt-get update && sudo apt-get install -y gcc-arm-none-eabi
       - name: Build every threadx example
@@ -59,7 +59,7 @@ jobs:
     name: Zephyr OS
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       # base-path is the west topdir, app-path the manifest repo inside it: init runs from
       # examples/, whose manifest is zephyr-os/west.yml. Also installs the SDK, and fetches
       # shallow (west update -o=--depth=1), as examples/zephyr-os/AGENTS.md documents.
