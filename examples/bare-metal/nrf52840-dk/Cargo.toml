@@ -7,7 +7,7 @@ edition = "2024"
 [dependencies]
 cortex-m = "0.7"
 cortex-m-rt = "0.7.3"
-nrf52840-hal = "0.18"
+nrf52840-hal = "0.19"
 panic-halt = "1.0"
 
 [[bin]]
