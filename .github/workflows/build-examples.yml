@@ -6,6 +6,7 @@ on:
   pull_request:
     paths:
       - "examples/**"
+      - "rust-toolchain.toml"
       - ".github/workflows/build-examples.yml"
 
 jobs:
@@ -14,9 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: thumbv6m-none-eabi,thumbv7m-none-eabi,thumbv7em-none-eabi,thumbv7em-none-eabihf,thumbv8m.main-none-eabihf
+      - run: rustup toolchain install
       - name: Build every bare-metal and embassy-rust example
         run: |
           for dir in examples/bare-metal/*/ examples/embassy-rust/*/; do

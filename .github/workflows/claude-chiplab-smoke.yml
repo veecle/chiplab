@@ -107,14 +107,10 @@ jobs:
       # ---------------------------------------------------------------------
       # STEP 2: Install the Rust toolchain
       # ---------------------------------------------------------------------
-      # The stm32f4-discovery example cross-compiles for ARM Cortex-M4.
-      # We only need the one target, not the full set that build-examples
-      # uses. dtolnay/rust-toolchain is the community-standard action for
-      # this - faster and more reliable than rustup manually.
+      # rustup installs the version and targets pinned in rust-toolchain.toml,
+      # the same toolchain the other workflows and `nix develop` use.
       # ---------------------------------------------------------------------
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: thumbv7m-none-eabi
+      - run: rustup toolchain install
 
       # ---------------------------------------------------------------------
       # STEP 3: Generate the MCP configuration
