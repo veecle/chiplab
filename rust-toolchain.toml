@@ -1,0 +1,11 @@
+# The toolchain CI, Nix and rustup users build the `bare-metal` and `embassy-rust` examples with; Renovate bumps it.
+# `targets` must cover every example's `.cargo/config.toml` target (`nix flake check` enforces it).
+[toolchain]
+channel = "1.100.0"
+targets = [
+  "thumbv6m-none-eabi",
+  "thumbv7m-none-eabi",
+  "thumbv7em-none-eabi",
+  "thumbv7em-none-eabihf",
+  "thumbv8m.main-none-eabihf",
+]

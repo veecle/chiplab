@@ -5,8 +5,10 @@ run contract see the [root AGENTS.md](../../AGENTS.md).
 
 ## Toolchain & build
 
-Rust ≥ 1.85 (`edition = "2024"`). Each example pins its target via `.cargo/config.toml`,
-so `cargo build --release` in the example dir is enough; install the target once.
+`rustup toolchain install` installs the toolchain and targets pinned in
+[rust-toolchain.toml](../../rust-toolchain.toml), and each example pins its target via
+`.cargo/config.toml`, so `cargo build --release` in the example dir is enough. A new
+example's target must be added to `rust-toolchain.toml`.
 
 | Board | Rust target |
 |---|---|
@@ -18,7 +20,7 @@ so `cargo build --release` in the example dir is enough; install the target once
 | nrf52840-dk | `thumbv7em-none-eabihf` |
 
 ```sh
-rustup target add <rust-target>
+rustup toolchain install
 cd examples/embassy-rust/<board>
 cargo build --release
 # ELF: target/<rust-target>/release/hello-<board>

@@ -59,14 +59,15 @@ Build steps are framework-specific. Read the chosen framework's
 building. The Rust frameworks (`bare-metal`, `embassy-rust`) work like this:
 
 ```sh
-rustup target add <rust-target>     # one-time; target is in examples/<framework>/AGENTS.md
+rustup toolchain install            # the version and targets pinned in rust-toolchain.toml
 cd examples/<framework>/<board>     # each example pins its target via .cargo/config.toml
 cargo build --release
 # ELF: target/<rust-target>/release/hello-<board>
 ```
 
-The Rust frameworks require Rust ≥ 1.85 (for `edition = "2024"`); run `rustup update
-stable` if needed. Per-board targets and concrete examples are in each framework's
+`rustup toolchain install` works from anywhere in the repo and installs the toolchain
+[rust-toolchain.toml](rust-toolchain.toml) pins, with every example's target. Per-board
+targets and concrete examples are in each framework's
 `examples/<framework>/AGENTS.md`.
 
 If Nix is available, `nix develop` provides every framework's toolchain instead, and

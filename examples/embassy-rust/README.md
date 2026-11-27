@@ -5,8 +5,8 @@
 
 ## Toolchain
 
-Rust ≥ 1.85 (for `edition = "2024"`); `rustup update stable` if needed. Install the
-board's target once:
+`rustup toolchain install` installs the toolchain and targets pinned in the repo's
+[rust-toolchain.toml](../../rust-toolchain.toml). Each board builds for:
 
 | Board | Rust target |
 |---|---|
@@ -20,7 +20,7 @@ board's target once:
 ## Build
 
 ```sh
-rustup target add <rust-target>
+rustup toolchain install
 cd examples/embassy-rust/<board>    # target is pinned in .cargo/config.toml
 cargo build --release
 # ELF: target/<rust-target>/release/hello-<board>

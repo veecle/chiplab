@@ -17,16 +17,24 @@
 
     # Each example pins its target in its `.cargo/config.toml`.
     exampleTarget = src: (lib.importTOML (src + "/.cargo/config.toml")).build.target;
-    targets = lib.unique (map (example: exampleTarget example.src) examples);
 
-    rustToolchain = pkgs.rust-bin.stable.latest.default.override {
+    # The same toolchain rustup users get, so Nix builds test what the docs tell them to use.
+    toolchainFile = (lib.importTOML (root + "/rust-toolchain.toml")).toolchain;
+    missingTargets = lib.subtractLists toolchainFile.targets (map (example: exampleTarget example.src) examples);
+    targets =
+      lib.throwIfNot (missingTargets == [])
+      "rust-toolchain.toml is missing example targets: ${toString missingTargets}"
+      toolchainFile.targets;
+    rustBin = pkgs.rust-bin.stable.${toolchainFile.channel};
+
+    rustToolchain = rustBin.default.override {
       extensions = ["rust-src" "rust-analyzer"];
       inherit targets;
     };
 
     # Without the shell's extensions, so building the examples doesn't pull in `rust-analyzer`.
     rustPlatform = let
-      toolchain = pkgs.rust-bin.stable.latest.minimal.override {inherit targets;};
+      toolchain = rustBin.minimal.override {inherit targets;};
     in
       pkgs.makeRustPlatform {
         cargo = toolchain;
