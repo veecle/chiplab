@@ -99,7 +99,7 @@ jobs:
       # guard step above failed - this lets us see the full error instead
       # of a confusing "step skipped" message.
       # ---------------------------------------------------------------------
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         if: ${{ !cancelled() }}
         with:
           ref: refs/pull/${{ github.event.issue.number }}/head
